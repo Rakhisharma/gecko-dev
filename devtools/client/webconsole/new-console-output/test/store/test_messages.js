@@ -17,3 +17,15 @@ add_task(function*() {
   deepEqual(getState().messages, [expectedPacket],
     "MESSAGE_ADD action adds a message");
 });
+
+add_task(function*() {
+  const { getRepeatId } = require("devtools/client/webconsole/new-console-output/reducers/messages");
+
+  const clonedPacket = Object.assign({}, packet);
+  equal(getRepeatId(packet), getRepeatId(clonedPacket),
+    "getRepeatId() returns same repeat id for objects with the same values");
+
+  const modifiedPacket = Object.assign({}, packet, { "from": "other actor" });
+  notEqual(getRepeatId(packet), getRepeatId(modifiedPacket),
+    "getRepeatId() returns different repeat ids for different values");
+});

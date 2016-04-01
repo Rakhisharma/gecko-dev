@@ -20,4 +20,14 @@ function messages(state = [], action) {
   return state;
 }
 
+function getRepeatId(message) {
+  let clonedMessage = JSON.parse(JSON.stringify(message));
+  delete clonedMessage.timeStamp;
+  delete clonedMessage.uniqueID;
+  delete clonedMessage.repeatId;
+  return JSON.stringify(clonedMessage);
+}
+
 exports.messages = messages;
+// Export so it can be unit tested.
+exports.getRepeatId = getRepeatId;
