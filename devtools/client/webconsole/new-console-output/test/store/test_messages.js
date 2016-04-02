@@ -4,28 +4,55 @@
 
 const actions = require("devtools/client/webconsole/new-console-output/actions/messages");
 const packet = testPackets.get("console.log");
+const { prepareMessage } = require("devtools/client/webconsole/new-console-output/actions/messages");
+const { getRepeatId } = require("devtools/client/webconsole/new-console-output/reducers/messages");
 
 function run_test() {
   run_next_test();
 }
 
+/**
+ * Test adding a message to the store.
+ */
 add_task(function*() {
   const { getState, dispatch } = storeFactory();
 
   dispatch(actions.messageAdd(packet));
-  const expectedPacket = Object.assign({}, packet);
-  deepEqual(getState().messages, [expectedPacket],
+
+  const expectedMessage = prepareMessage(packet);
+  expectedMessage.repeatId = getRepeatId(expectedMessage);
+
+  deepEqual(getState().messages, [expectedMessage],
     "MESSAGE_ADD action adds a message");
 });
 
+/**
+ * Test repeating messages in the store.
+ */
 add_task(function*() {
-  const { getRepeatId } = require("devtools/client/webconsole/new-console-output/reducers/messages");
+  const { getState, dispatch } = storeFactory();
 
-  const clonedPacket = Object.assign({}, packet);
-  equal(getRepeatId(packet), getRepeatId(clonedPacket),
+  dispatch(actions.messageAdd(packet));
+  dispatch(actions.messageAdd(packet));
+
+  const expectedMessage = prepareMessage(packet);
+  expectedMessage.repeatId = getRepeatId(expectedMessage);
+  expectedMessage.repeats = 2;
+
+  deepEqual(getState().messages, [expectedMessage],
+    "Adding same message to the store twice results in repeated message");
+});
+
+/**
+ * Test getRepeatId().
+ */
+add_task(function*() {
+  const message1 = prepareMessage(packet);
+  const message2 = prepareMessage(packet);
+  equal(getRepeatId(message1), getRepeatId(message2),
     "getRepeatId() returns same repeat id for objects with the same values");
 
-  const modifiedPacket = Object.assign({}, packet, { "from": "other actor" });
-  notEqual(getRepeatId(packet), getRepeatId(modifiedPacket),
+  message2.data.arguments = ["new args"];
+  notEqual(getRepeatId(message1), getRepeatId(message2),
     "getRepeatId() returns different repeat ids for different values");
 });
