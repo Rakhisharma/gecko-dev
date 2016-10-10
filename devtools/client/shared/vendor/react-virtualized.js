@@ -1470,7 +1470,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
         }
         var createStyles = function() {
             if (!stylesCreated) {
-                var css = (animationKeyframes ? animationKeyframes : "") + ".resize-triggers { " + (animationStyle ? animationStyle : "") + 'visibility: hidden; opacity: 0; } .resize-triggers, .resize-triggers > div, .contract-trigger:before { content: " "; display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: -1; } .resize-triggers > div { background: #eee; overflow: auto; } .contract-trigger:before { width: 200%; height: 200%; }', head = document.head || document.getElementsByTagName("head")[0], style = document.createElement("style");
+                var css = (animationKeyframes ? animationKeyframes : "") + ".resize-triggers { " + (animationStyle ? animationStyle : "") + 'visibility: hidden; opacity: 0; } .resize-triggers, .resize-triggers > div, .contract-trigger:before { content: " "; display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: -1; } .resize-triggers > div { background: #eee; overflow: auto; } .contract-trigger:before { width: 200%; height: 200%; }', head = document.firstElementChild || document.getElementsByTagName("head")[0], style = document.createElement("style");
                 style.type = "text/css", style.styleSheet ? style.styleSheet.cssText = css : style.appendChild(document.createTextNode(css)),
                 head.appendChild(style), stylesCreated = !0;
             }
@@ -1611,7 +1611,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
                 key: "_getContainerNode",
                 value: function(props) {
                     var container = props.container;
-                    return container ? _reactDom2["default"].findDOMNode("function" == typeof container ? container() : container) : document.body;
+                    return container ? _reactDom2["default"].findDOMNode("function" == typeof container ? container() : container) : document.firstElementChild;
                 }
             }, {
                 key: "_measureCell",
@@ -2318,10 +2318,11 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
         var size, canUseDOM = __webpack_require__(113);
         module.exports = function(recalc) {
             if ((!size || recalc) && canUseDOM) {
-                var scrollDiv = document.createElement("div");
+                debugger
+                var scrollDiv = document.createElementNS("http://www.w3.org/1999/xhtml","div");
                 scrollDiv.style.position = "absolute", scrollDiv.style.top = "-9999px", scrollDiv.style.width = "50px",
-                scrollDiv.style.height = "50px", scrollDiv.style.overflow = "scroll", document.body.appendChild(scrollDiv),
-                size = scrollDiv.offsetWidth - scrollDiv.clientWidth, document.body.removeChild(scrollDiv);
+                scrollDiv.style.height = "50px", scrollDiv.style.overflow = "scroll", document.firstElementChild.appendChild(scrollDiv),
+                size = scrollDiv.offsetWidth - scrollDiv.clientWidth, document.firstElementChild.removeChild(scrollDiv);
             }
             return size;
         };
@@ -4327,7 +4328,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
     function(module, exports) {
         "use strict";
         function enablePointerEventsIfDisabled() {
-            disablePointerEventsTimeoutId && (disablePointerEventsTimeoutId = null, document.body.style.pointerEvents = originalBodyPointerEvents,
+            disablePointerEventsTimeoutId && (disablePointerEventsTimeoutId = null, document.firstElementChild.style.pointerEvents = originalBodyPointerEvents,
             originalBodyPointerEvents = null);
         }
         function enablePointerEventsAfterDelayCallback() {
@@ -4339,8 +4340,8 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
             disablePointerEventsTimeoutId && clearTimeout(disablePointerEventsTimeoutId), disablePointerEventsTimeoutId = setTimeout(enablePointerEventsAfterDelayCallback, IS_SCROLLING_TIMEOUT);
         }
         function onScrollWindow(event) {
-            null == originalBodyPointerEvents && (originalBodyPointerEvents = document.body.style.pointerEvents,
-            document.body.style.pointerEvents = "none", enablePointerEventsAfterDelay()), mountedInstances.forEach(function(component) {
+            null == originalBodyPointerEvents && (originalBodyPointerEvents = document.firstElementChild.style.pointerEvents,
+            document.firstElementChild.style.pointerEvents = "none", enablePointerEventsAfterDelay()), mountedInstances.forEach(function(component) {
                 return component._onScrollWindow(event);
             });
         }

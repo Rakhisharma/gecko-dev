@@ -1,0 +1,8 @@
+"react-virtualized" uses UMD style loading to work in many different environments.
+It assumes that "react", "react-addons-shallow-compare", and "react-dom" are all included
+separately via require statements. The paths to our installations are different.
+
+If upgrading, define the correct paths and replace the require statements for the
+module.exports case with the correct paths.
+
+Also, replace any references to React.addons.shallowCompare with the webpack module id.
