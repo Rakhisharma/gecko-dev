@@ -5,11 +5,15 @@
 
 const {
   createClass,
+  createElement,
   createFactory,
   DOM: dom,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
-const ReactDOM = require("devtools/client/shared/vendor/react-dom");
+const {
+  AutoSizer,
+  List
+} = require("devtools/client/shared/vendor/react-virtualized");
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
 const {
@@ -59,6 +63,21 @@ const ConsoleOutput = createClass({
     }
   },
 
+  _rowRenderer ({ index, isScrolling, key, style }) {
+    // const {
+    //   showScrollingPlaceholder,
+    //   useDynamicRowHeight
+    // } = this.state
+
+    const datum = index;
+
+    return dom.div({
+      style: {
+        minHeight: "20px"
+      },
+    }, datum);
+  },
+
   render() {
     let {
       dispatch,
@@ -70,32 +89,47 @@ const ConsoleOutput = createClass({
       groups,
     } = this.props;
 
-    let messageNodes = messages.map((message) => {
-      const parentGroups = message.groupId ? (
-        (groups.get(message.groupId) || [])
-          .concat([message.groupId])
-      ) : [];
+    // let messageNodes = messages.map((message) => {
+    //   const parentGroups = message.groupId ? (
+    //     (groups.get(message.groupId) || [])
+    //       .concat([message.groupId])
+    //   ) : [];
 
-      return (
-        MessageContainer({
-          dispatch,
-          message,
-          key: message.id,
-          serviceContainer,
-          open: messagesUi.includes(message.id),
-          tableData: messagesTableData.get(message.id),
-          autoscroll,
-          indent: parentGroups.length,
-        })
-      );
-    });
+    //   return (
+    //     MessageContainer({
+    //       dispatch,
+    //       message,
+    //       key: message.id,
+    //       serviceContainer,
+    //       open: messagesUi.includes(message.id),
+    //       tableData: messagesTableData.get(message.id),
+    //       autoscroll,
+    //       indent: parentGroups.length,
+    //     })
+    //   );
+    // });
+
+    const messageList = ({width}) => {
+      return createElement(List, {
+        ref: "List",
+        height: 1000,
+        overscanRowCount: 20,
+        rowCount: 500,
+        rowHeight: 20,
+        rowRenderer: this._rowRenderer,
+        scrollToIndex: 0,
+        width,
+      });
+    };
     return (
       dom.div({
         className: "webconsole-output",
         ref: node => {
           this.outputNode = node;
         },
-      }, messageNodes
+      },
+
+        createElement(AutoSizer, { disableHeight: true }, messageList)
       )
     );
   }
