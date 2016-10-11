@@ -75,6 +75,7 @@ const Message = createClass({
 
   render() {
     const {
+      style,
       messageId,
       open,
       collapsible,
@@ -150,6 +151,7 @@ const Message = createClass({
     }
 
     return dom.div({
+      style,
       className: topLevelClasses.join(" "),
       ref: node => {
         this.messageNode = node;

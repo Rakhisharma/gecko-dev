@@ -26,7 +26,7 @@ EvaluationResult.defaultProps = {
 };
 
 function EvaluationResult(props) {
-  const { message, serviceContainer, indent } = props;
+  const { message, serviceContainer, indent, style } = props;
   const {
     source,
     type,
@@ -45,6 +45,7 @@ function EvaluationResult(props) {
   const topLevelClasses = ["cm-s-mozilla"];
 
   const childProps = {
+    style,
     source,
     type,
     level,

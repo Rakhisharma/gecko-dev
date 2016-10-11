@@ -34,6 +34,7 @@ ConsoleApiCall.defaultProps = {
 
 function ConsoleApiCall(props) {
   const {
+    style,
     dispatch,
     message,
     open,
@@ -90,6 +91,7 @@ function ConsoleApiCall(props) {
   const topLevelClasses = ["cm-s-mozilla"];
 
   return Message({
+    style,
     messageId,
     open,
     collapsible,

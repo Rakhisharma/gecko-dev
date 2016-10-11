@@ -63,20 +63,7 @@ const ConsoleOutput = createClass({
     }
   },
 
-  _rowRenderer ({ index, isScrolling, key, style }) {
-    // const {
-    //   showScrollingPlaceholder,
-    //   useDynamicRowHeight
-    // } = this.state
-
-    const datum = index;
-
-    return dom.div({
-      style,
-    }, datum);
-  },
-
-  render() {
+  _rowRenderer({ index, isScrolling, key, style }) {
     let {
       dispatch,
       autoscroll,
@@ -87,35 +74,38 @@ const ConsoleOutput = createClass({
       groups,
     } = this.props;
 
-    // let messageNodes = messages.map((message) => {
-    //   const parentGroups = message.groupId ? (
-    //     (groups.get(message.groupId) || [])
-    //       .concat([message.groupId])
-    //   ) : [];
+    const message = messages.get(index);
 
-    //   return (
-    //     MessageContainer({
-    //       dispatch,
-    //       message,
-    //       key: message.id,
-    //       serviceContainer,
-    //       open: messagesUi.includes(message.id),
-    //       tableData: messagesTableData.get(message.id),
-    //       autoscroll,
-    //       indent: parentGroups.length,
-    //     })
-    //   );
-    // });
+    const parentGroups = message.groupId ? (
+      (groups.get(message.groupId) || [])
+        .concat([message.groupId])
+    ) : [];
+
+    return MessageContainer({
+      dispatch,
+      message,
+      key: message.id,
+      serviceContainer,
+      open: messagesUi.includes(message.id),
+      tableData: messagesTableData.get(message.id),
+      autoscroll,
+      indent: parentGroups.length,
+      style,
+    });
+  },
+
+  render() {
+    let {messages} = this.props;
 
     const messageList = ({width, height}) => {
       return createElement(List, {
         ref: "List",
         height: 500,
         overscanRowCount: 10,
-        rowCount: 500,
+        rowCount: messages.size,
         rowHeight: 50,
         rowRenderer: this._rowRenderer,
-        scrollToIndex: 0,
+        scrollToIndex: messages.size - 1,
         width,
       });
     };

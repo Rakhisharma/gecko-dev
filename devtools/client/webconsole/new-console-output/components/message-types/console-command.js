@@ -29,7 +29,12 @@ ConsoleCommand.defaultProps = {
  * Displays input from the console.
  */
 function ConsoleCommand(props) {
-  const { autoscroll, indent, message } = props;
+  const {
+    autoscroll,
+    indent,
+    message,
+    style,
+  } = props;
   const {
     source,
     type,
@@ -42,6 +47,7 @@ function ConsoleCommand(props) {
   } = props;
 
   const childProps = {
+    style,
     source,
     type,
     level,
