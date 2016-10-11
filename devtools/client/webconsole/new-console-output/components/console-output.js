@@ -12,7 +12,7 @@ const {
 } = require("devtools/client/shared/vendor/react");
 const {
   AutoSizer,
-  List
+  List,
 } = require("devtools/client/shared/vendor/react-virtualized");
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
@@ -39,7 +39,7 @@ const ConsoleOutput = createClass({
   },
 
   componentDidMount() {
-    scrollToBottom(this.outputNode);
+    //scrollToBottom(this.outputNode);
     this.props.serviceContainer.attachRefToHud("outputScroller", this.outputNode);
   },
 
@@ -53,7 +53,7 @@ const ConsoleOutput = createClass({
     // Figure out if we are at the bottom. If so, then any new message should be scrolled
     // into view.
     if (this.props.autoscroll && outputNode.lastChild) {
-      this.shouldScrollBottom = isScrolledToBottom(outputNode.lastChild, outputNode);
+      //this.shouldScrollBottom = isScrolledToBottom(outputNode.lastChild, outputNode);
     }
   },
 
@@ -72,9 +72,7 @@ const ConsoleOutput = createClass({
     const datum = index;
 
     return dom.div({
-      style: {
-        minHeight: "20px"
-      },
+      style,
     }, datum);
   },
 
@@ -109,29 +107,20 @@ const ConsoleOutput = createClass({
     //   );
     // });
 
-    const messageList = ({width}) => {
+    const messageList = ({width, height}) => {
       return createElement(List, {
         ref: "List",
-        height: 1000,
-        overscanRowCount: 20,
+        height: 500,
+        overscanRowCount: 10,
         rowCount: 500,
-        rowHeight: 20,
+        rowHeight: 50,
         rowRenderer: this._rowRenderer,
         scrollToIndex: 0,
         width,
       });
     };
-    return (
-      dom.div({
-        className: "webconsole-output",
-        ref: node => {
-          this.outputNode = node;
-        },
-      },
 
-        createElement(AutoSizer, { disableHeight: true }, messageList)
-      )
-    );
+    return messageList({width: 600, height: 300});
   }
 });
 
