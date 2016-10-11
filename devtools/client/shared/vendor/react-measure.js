@@ -912,7 +912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var ieVersion = (function () {
 	        var undef,
 	            v = 3,
-	            div = document.createElement("div"),
+	            div = document.createElementNS("http://www.w3.org/1999/xhtml", "div"),
 	            all = div.getElementsByTagName("i");
 
 	        do {
@@ -1276,7 +1276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                //Add an object element as a child to the target element that will be listened to for resize events.
-	                var object = document.createElement("object");
+	                var object = document.createElementNS("http://www.w3.org/1999/xhtml", "object");
 	                object.style.cssText = OBJECT_STYLE;
 	                object.type = "text/html";
 	                object.onload = onObjectLoad;
@@ -1381,20 +1381,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var width = 500;
 	        var height = 500;
 
-	        var child = document.createElement("div");
+	        var child = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
 	        child.style.cssText = "position: absolute; width: " + width * 2 + "px; height: " + height * 2 + "px; visibility: hidden; margin: 0; padding: 0;";
 
-	        var container = document.createElement("div");
+	        var container = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
 	        container.style.cssText = "position: absolute; width: " + width + "px; height: " + height + "px; overflow: scroll; visibility: none; top: " + -width * 3 + "px; left: " + -height * 3 + "px; visibility: hidden; margin: 0; padding: 0;";
 
 	        container.appendChild(child);
 
-	        document.body.insertBefore(container, document.body.firstChild);
+	        document.firstElementChild.insertBefore(container, document.firstElementChild.firstChild);
 
 	        var widthSize = width - container.clientWidth;
 	        var heightSize = height - container.clientHeight;
 
-	        document.body.removeChild(container);
+	        document.firstElementChild.removeChild(container);
 
 	        return {
 	            width: widthSize,
@@ -1405,10 +1405,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function injectScrollStyle(styleId, containerClass) {
 	        function injectStyle(style, method) {
 	            method = method || function (element) {
-	                document.head.appendChild(element);
+	                document.firstElementChild.appendChild(element);
 	            };
 
-	            var styleElement = document.createElement("style");
+	            var styleElement = document.createElementNS("http://www.w3.org/1999/xhtml", "style");
 	            styleElement.innerHTML = style;
 	            styleElement.id = styleId;
 	            method(styleElement);
@@ -1507,7 +1507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        function isDetached(element) {
 	            function isInDocument(element) {
-	                return element === element.ownerDocument.body || element.ownerDocument.body.contains(element);
+	                return element === element.ownerdocument.firstElementChild || element.ownerdocument.firstElementChild.contains(element);
 	            }
 	            return !isInDocument(element);
 	        }
@@ -1609,7 +1609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var container = getState(element).container;
 
 	            if (!container) {
-	                container = document.createElement("div");
+	                container = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
 	                container.className = detectionContainerClass;
 	                container.style.cssText = "visibility: hidden; display: inline; width: 0px; height: 0px; z-index: -1; overflow: hidden; margin: 0; padding: 0;";
 	                getState(element).container = container;
@@ -1700,12 +1700,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var expandChildStyle = "position: absolute; left: 0; top: 0;";
 	            var shrinkChildStyle = "position: absolute; width: 200%; height: 200%;";
 
-	            var containerContainer = document.createElement("div");
-	            var container = document.createElement("div");
-	            var expand = document.createElement("div");
-	            var expandChild = document.createElement("div");
-	            var shrink = document.createElement("div");
-	            var shrinkChild = document.createElement("div");
+	            var containerContainer = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+	            var container = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+	            var expand = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+	            var expandChild = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+	            var shrink = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+	            var shrinkChild = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
 	            // Some browsers choke on the resize system being rtl, so force it to ltr. https://github.com/wnr/element-resize-detector/issues/56
 	            // However, dir should not be set on the top level container as it alters the dimensions of the target element in some browsers.
@@ -2022,7 +2022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function getCloneDimensions(node, options) {
 	  var parentNode = node.parentNode;
 
-	  var context = document.createElement('div');
+	  var context = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
 	  var clone = node.cloneNode(true);
 	  var style = getComputedStyle(clone);
 	  var rect = {};
