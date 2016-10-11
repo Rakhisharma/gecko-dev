@@ -3,7 +3,6 @@ var REACT_DOM_PATH = "devtools/client/shared/vendor/react-dom";
 var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-compare";
 
 !function(root, factory) {
-    debugger
     let React = require(REACT_PATH);
     let shallowCompare = require(REACT_SHALLOW_COMPARE);
     let ReactDOM = require(REACT_DOM_PATH);
@@ -2318,7 +2317,6 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
         var size, canUseDOM = __webpack_require__(113);
         module.exports = function(recalc) {
             if ((!size || recalc) && canUseDOM) {
-                debugger
                 var scrollDiv = document.createElementNS("http://www.w3.org/1999/xhtml","div");
                 scrollDiv.style.position = "absolute", scrollDiv.style.top = "-9999px", scrollDiv.style.width = "50px",
                 scrollDiv.style.height = "50px", scrollDiv.style.overflow = "scroll", document.firstElementChild.appendChild(scrollDiv),
