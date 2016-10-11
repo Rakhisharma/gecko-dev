@@ -17,6 +17,7 @@ if CONFIG['DEBUG_JS_MODULES'] or CONFIG['MOZ_DEBUG']:
 
 modules += [
     'react-dom.js',
+    'react-measure.js',
     'react-proxy.js',
     'react-redux.js',
     'react-virtualized.js',
