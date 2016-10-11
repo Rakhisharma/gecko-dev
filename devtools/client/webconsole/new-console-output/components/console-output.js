@@ -12,8 +12,6 @@ const {
 } = require("devtools/client/shared/vendor/react");
 const {
   AutoSizer,
-  CellMeasurer,
-  Grid,
   List,
 } = require("devtools/client/shared/vendor/react-virtualized");
 const { connect } = require("devtools/client/shared/vendor/react-redux");
@@ -65,7 +63,7 @@ const ConsoleOutput = createClass({
     }
   },
 
-  _rowRenderer({ rowIndex, style }) {
+  _rowRenderer({ index, isScrolling, key, style }) {
     let {
       dispatch,
       autoscroll,
@@ -76,7 +74,7 @@ const ConsoleOutput = createClass({
       groups,
     } = this.props;
 
-    const message = messages.get(rowIndex);
+    const message = messages.get(index);
 
     const parentGroups = message.groupId ? (
       (groups.get(message.groupId) || [])
@@ -99,43 +97,20 @@ const ConsoleOutput = createClass({
   render() {
     let {messages} = this.props;
 
-    // const messageList = ({width, height}) => {
-    //   return createElement(List, {
-    //     ref: "List",
-    //     height: 200,
-    //     overscanRowCount: 10,
-    //     rowCount: messages.size,
-    //     rowHeight: 50,
-    //     rowRenderer: this._rowRenderer,
-    //     scrollToIndex: messages.size - 1,
-    //     width,
-    //   });
-    // };
-
-    const messageGrid = ({ getRowHeight }) => {
-      return createElement(Grid, {
-        columnCount: 1,
-        columnWidth: 500,
-        height: 250,
-        overscanColumnCount: 0,
-        overscanRowCount: 30,
-        cellRenderer: this._rowRenderer,
+    const messageList = ({width, height}) => {
+      return createElement(List, {
+        ref: "List",
+        height: 200,
+        overscanRowCount: 10,
         rowCount: messages.size,
-        rowHeight: getRowHeight,
-        scrollToRow: messages.size - 1,
-        width: 500,
+        rowHeight: 50,
+        rowRenderer: this._rowRenderer,
+        scrollToIndex: messages.size - 1,
+        width,
       });
     };
 
-    return createElement(CellMeasurer,
-      {
-        cellRenderer: this._rowRenderer,
-        columnCount: 1,
-        width: 500,
-        rowCount: messages.size,
-      },
-      messageGrid
-    );
+    return messageList({width: 600, height: 300});
   }
 });
 
