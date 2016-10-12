@@ -14,6 +14,7 @@ const {
   AutoSizer,
   List,
 } = require("devtools/client/shared/vendor/react-virtualized");
+const Measure = require("devtools/client/shared/vendor/react-measure");
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
 const {
@@ -81,17 +82,25 @@ const ConsoleOutput = createClass({
         .concat([message.groupId])
     ) : [];
 
-    return MessageContainer({
-      dispatch,
-      message,
-      key: message.id,
-      serviceContainer,
-      open: messagesUi.includes(message.id),
-      tableData: messagesTableData.get(message.id),
-      autoscroll,
-      indent: parentGroups.length,
-      style,
-    });
+    const onMessure = (dimensions) => {
+      console.log(dimensions);
+    };
+
+    return createElement(Measure,
+      { onMessure },
+      MessageContainer({
+        dispatch,
+        message,
+        key: message.id,
+        serviceContainer,
+        open: messagesUi.includes(message.id),
+        tableData: messagesTableData.get(message.id),
+        autoscroll,
+        indent: parentGroups.length,
+        style,
+      })
+    );
+
   },
 
   render() {
