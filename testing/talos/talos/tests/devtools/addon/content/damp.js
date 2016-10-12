@@ -21,7 +21,7 @@ function Damp() {
   this._snapshot = null;
 
   // Use the old console for now: https://bugzilla.mozilla.org/show_bug.cgi?id=1306780
-  Services.prefs.setBoolPref("devtools.webconsole.new-frontend-enabled", false);
+  Services.prefs.setBoolPref("devtools.webconsole.new-frontend-enabled", true);
 }
 
 Damp.prototype = {
@@ -116,7 +116,7 @@ Damp.prototype = {
   },
 
   _consoleBulkLoggingTest: Task.async(function*() {
-    let TOTAL_MESSAGES = 10;
+    let TOTAL_MESSAGES = 1000;
     let tab = yield this.testSetup(SIMPLE_URL);
     let messageManager = tab.linkedBrowser.messageManager;
     let {toolbox} = yield this.openToolbox("webconsole");
