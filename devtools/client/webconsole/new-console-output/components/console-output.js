@@ -26,6 +26,33 @@ const {
 const { getScrollSetting } = require("devtools/client/webconsole/new-console-output/selectors/ui");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
+class RowHeightCache {
+  constructor () {
+    this._cachedRowHeights = {}
+  }
+
+  clearAllRowHeights () {
+    this._cachedRowHeights = {}
+  }
+
+  clearRowHeight (index) {
+    delete this._cachedRowHeights[index]
+  }
+
+  getRowHeight (index) {
+    return this._cachedRowHeights[index]
+  }
+
+  hasRowHeight (index) {
+    return !!this._cachedRowHeights[index]
+  }
+
+  setRowHeight (index, height) {
+    this._cachedRowHeights[index] = height
+  }
+}
+const cache = new RowHeightCache();
+
 const ConsoleOutput = createClass({
 
   displayName: "ConsoleOutput",
@@ -40,7 +67,7 @@ const ConsoleOutput = createClass({
   },
 
   componentDidMount() {
-    scrollToBottom(this.outputNode);
+    //scrollToBottom(this.outputNode);
     this.props.serviceContainer.attachRefToHud("outputWrapper", this.outputNode);
   },
 
@@ -60,7 +87,14 @@ const ConsoleOutput = createClass({
 
   componentDidUpdate() {
     if (this.shouldScrollBottom) {
-      scrollToBottom(this.outputNode);
+      //scrollToBottom(this.outputNode);
+    }
+  },
+
+  _cacheRowHeight(id, height) {
+    if (cache.getRowHeight(id) != height) {
+      cache.setRowHeight(id, height);
+      this.forceUpdate();
     }
   },
 
@@ -92,8 +126,16 @@ const ConsoleOutput = createClass({
         tableData: messagesTableData.get(message.id),
         autoscroll,
         indent: parentGroups.length,
+        onUpdate: this._cacheRowHeight,
       })
     );
+  },
+
+  _getRowHeight(index) {
+    const message = this.props.messages.get(index);
+    const height = cache.getRowHeight(message.id) || 40;
+    console.log(index, height);
+    return height;
   },
 
   render() {
@@ -110,13 +152,17 @@ const ConsoleOutput = createClass({
             width: 1200,
             maxHeight: 200,
             rowsCount: messages.size,
-            rowHeight: 50,
+            rowHeight: 20,
+            rowHeightGetter: this._getRowHeight,
             scrollToRow: messages.size - 1,
           },
           createElement(Column,
             {
               cell: (props) => {
-                return createElement(Cell, {}, this._getRow(props.rowIndex));
+                return createElement(Cell,
+                  {},
+                  this._getRow(props.rowIndex)
+                );
               },
               width: 1200,
             },

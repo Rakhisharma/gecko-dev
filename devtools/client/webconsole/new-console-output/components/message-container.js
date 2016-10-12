@@ -10,6 +10,7 @@
 const {
   createClass,
   createFactory,
+  findDOMNode,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
 
@@ -45,11 +46,27 @@ const MessageContainer = createClass({
     };
   },
 
+  componentDidMount() {
+    this._cacheMessageHeight();
+  },
+
   shouldComponentUpdate(nextProps, nextState) {
     const repeatChanged = this.props.message.repeat !== nextProps.message.repeat;
     const openChanged = this.props.open !== nextProps.open;
     const tableDataChanged = this.props.tableData !== nextProps.tableData;
     return repeatChanged || openChanged || tableDataChanged;
+  },
+
+  componentDidUpdate() {
+    this._cacheMessageHeight();
+  },
+
+  _cacheMessageHeight() {
+    const node = findDOMNode(this);
+    const height = node.clientHeight;
+    if (height > 0) {
+      this.props.onUpdate(this.props.message.id, height);
+    }
   },
 
   render() {

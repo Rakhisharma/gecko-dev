@@ -1549,10 +1549,6 @@ body[dir="rtl"] .fixedDataTableColumnResizerLineLayout_main {
   background-color: #f4f4f4;
 }
 
-.public_fixedDataTableCell_cellContent {
-  padding: 8px;
-}
-
 .public_fixedDataTableCell_columnResizerKnob {
   background-color: #0284ff;
 }
