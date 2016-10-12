@@ -8,13 +8,15 @@ const {
   createElement,
   createFactory,
   DOM: dom,
+  findDOMNode,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
 const {
   AutoSizer,
+  Grid,
   List,
 } = require("devtools/client/shared/vendor/react-virtualized");
-const Measure = require("devtools/client/shared/vendor/react-measure");
+const CellMeasurer = require("devtools/client/webconsole/new-console-output/components/cell-measurer");
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
 const {
@@ -64,7 +66,7 @@ const ConsoleOutput = createClass({
     }
   },
 
-  _rowRenderer({ index, isScrolling, key, style }) {
+  _rowRenderer({ rowIndex, style }) {
     let {
       dispatch,
       autoscroll,
@@ -75,51 +77,76 @@ const ConsoleOutput = createClass({
       groups,
     } = this.props;
 
-    const message = messages.get(index);
+    const message = messages.get(rowIndex);
 
     const parentGroups = message.groupId ? (
       (groups.get(message.groupId) || [])
         .concat([message.groupId])
     ) : [];
 
-    const onMessure = (dimensions) => {
-      console.log(dimensions);
-    };
-
-    return createElement(Measure,
-      { onMessure },
-      MessageContainer({
-        dispatch,
-        message,
-        key: message.id,
-        serviceContainer,
-        open: messagesUi.includes(message.id),
-        tableData: messagesTableData.get(message.id),
-        autoscroll,
-        indent: parentGroups.length,
-        style,
-      })
-    );
-
+    return MessageContainer({
+      dispatch,
+      message,
+      key: message.id,
+      serviceContainer,
+      open: messagesUi.includes(message.id),
+      tableData: messagesTableData.get(message.id),
+      autoscroll,
+      indent: parentGroups.length,
+      style,
+    });
   },
 
   render() {
     let {messages} = this.props;
 
-    const messageList = ({width, height}) => {
-      return createElement(List, {
-        ref: "List",
-        height: 200,
-        overscanRowCount: 10,
+    // const messageList = ({width, height}) => {
+    //   return createElement(List, {
+    //     ref: "List",
+    //     height: 200,
+    //     overscanRowCount: 10,
+    //     rowCount: messages.size,
+    //     rowHeight: 50,
+    //     rowRenderer: this._rowRenderer,
+    //     scrollToIndex: messages.size - 1,
+    //     width,
+    //   });
+    // };
+
+    const messageGrid = ({ getRowHeight }) => {
+      return createElement(Grid, {
+        columnCount: 1,
+        columnWidth: 1280,
+        height: 250,
+        overscanColumnCount: 0,
+        overscanRowCount: 30,
+        cellRenderer: this._rowRenderer,
         rowCount: messages.size,
-        rowHeight: 50,
-        rowRenderer: this._rowRenderer,
-        scrollToIndex: messages.size - 1,
-        width,
+        rowHeight: getRowHeight,
+        scrollToRow: messages.size - 1,
+        width: 1280,
       });
     };
 
-    return messageList({width: 600, height: 300});
+    return (
+      dom.div({
+        className: "webconsole-output",
+        ref: ref => {
+          this.outputNode = ref;
+        }
+      },
+        createElement(CellMeasurer,
+          {
+            cellRenderer: this._rowRenderer,
+            columnCount: 1,
+            width: 1280,
+            rowCount: messages.size,
+            container: this.outputNode ? this.outputNode : document.firstElementChild
+          },
+          messageGrid
+        )
+      )
+    );
   }
 });
 
