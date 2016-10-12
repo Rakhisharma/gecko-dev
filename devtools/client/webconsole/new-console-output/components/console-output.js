@@ -5,11 +5,16 @@
 
 const {
   createClass,
+  createElement,
   createFactory,
   DOM: dom,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
-const ReactDOM = require("devtools/client/shared/vendor/react-dom");
+const {
+  Cell,
+  Column,
+  Table
+} = require("devtools/client/shared/vendor/fixed-data-table");
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
 const {
@@ -59,7 +64,7 @@ const ConsoleOutput = createClass({
     }
   },
 
-  render() {
+  _getRow(index) {
     let {
       dispatch,
       autoscroll,
@@ -70,32 +75,54 @@ const ConsoleOutput = createClass({
       groups,
     } = this.props;
 
-    let messageNodes = messages.map((message) => {
-      const parentGroups = message.groupId ? (
-        (groups.get(message.groupId) || [])
-          .concat([message.groupId])
-      ) : [];
+    const message = messages.get(index);
 
-      return (
-        MessageContainer({
-          dispatch,
-          message,
-          key: message.id,
-          serviceContainer,
-          open: messagesUi.includes(message.id),
-          tableData: messagesTableData.get(message.id),
-          autoscroll,
-          indent: parentGroups.length,
-        })
-      );
-    });
+    const parentGroups = message.groupId ? (
+      (groups.get(message.groupId) || [])
+        .concat([message.groupId])
+    ) : [];
+
+    return (
+      MessageContainer({
+        dispatch,
+        message,
+        key: message.id,
+        serviceContainer,
+        open: messagesUi.includes(message.id),
+        tableData: messagesTableData.get(message.id),
+        autoscroll,
+        indent: parentGroups.length,
+      })
+    );
+  },
+
+  render() {
+    let { messages } = this.props;
     return (
       dom.div({
         className: "webconsole-output",
         ref: node => {
           this.outputNode = node;
         },
-      }, messageNodes
+      },
+        createElement(Table,
+          {
+            width: 1200,
+            maxHeight: 200,
+            rowsCount: messages.size,
+            rowHeight: 50,
+            scrollToRow: messages.size - 1,
+          },
+          createElement(Column,
+            {
+              cell: (props) => {
+                return createElement(Cell, {}, this._getRow(props.rowIndex));
+              },
+              width: 1200,
+            },
+            null
+          )
+        )
       )
     );
   }
