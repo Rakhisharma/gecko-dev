@@ -58,7 +58,7 @@ const Message = createClass({
   componentDidMount() {
     if (this.messageNode) {
       if (this.props.scrollToMessage) {
-        this.messageNode.scrollIntoView();
+        //this.messageNode.scrollIntoView();
       }
       // Event used in tests. Some message types don't pass it in because existing tests
       // did not emit for them.
