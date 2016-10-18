@@ -17,6 +17,7 @@ const {
   List,
 } = require("devtools/client/shared/vendor/react-virtualized");
 const CellMeasurer = require("devtools/client/webconsole/new-console-output/components/cell-measurer");
+const cellSizeCache = new (require("devtools/client/webconsole/new-console-output/components/cell-size-cache"))();
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
 const {
@@ -42,27 +43,19 @@ const ConsoleOutput = createClass({
   },
 
   componentDidMount() {
-    //scrollToBottom(this.outputNode);
-    this.props.serviceContainer.attachRefToHud("outputScroller", this.outputNode);
   },
 
   componentWillUpdate(nextProps, nextState) {
-    if (!this.outputNode) {
-      return;
-    }
-
-    const outputNode = this.outputNode;
-
-    // Figure out if we are at the bottom. If so, then any new message should be scrolled
-    // into view.
-    if (this.props.autoscroll && outputNode.lastChild) {
-      //this.shouldScrollBottom = isScrolledToBottom(outputNode.lastChild, outputNode);
-    }
   },
 
   componentDidUpdate() {
-    if (this.shouldScrollBottom) {
-      scrollToBottom(this.outputNode);
+  },
+
+  _updateRowHeight(id, index, height) {
+    if (!cellSizeCache.hasRowHeightById(id)
+      || cellSizeCache.getRowHeightById(id) != height) {
+      cellSizeCache.setRowHeight(id, index, height);
+      // @TODO Add a timed updater
     }
   },
 
@@ -94,6 +87,8 @@ const ConsoleOutput = createClass({
       autoscroll,
       indent: parentGroups.length,
       style,
+      updateRowHeight: this._updateRowHeight,
+      rowIndex,
     });
   },
 
@@ -141,7 +136,8 @@ const ConsoleOutput = createClass({
             columnCount: 1,
             width: 1280,
             rowCount: messages.size,
-            container: this.outputNode ? this.outputNode : document.firstElementChild
+            container: this.outputNode ? this.outputNode : document.firstElementChild,
+            cellSizeCache,
           },
           messageGrid
         )
@@ -149,17 +145,6 @@ const ConsoleOutput = createClass({
     );
   }
 });
-
-function scrollToBottom(node) {
-  node.scrollTop = node.scrollHeight;
-}
-
-function isScrolledToBottom(outputNode, scrollNode) {
-  let lastNodeHeight = outputNode.lastChild ?
-                       outputNode.lastChild.clientHeight : 0;
-  return scrollNode.scrollTop + scrollNode.clientHeight >=
-         scrollNode.scrollHeight - lastNodeHeight / 2;
-}
 
 function mapStateToProps(state, props) {
   return {

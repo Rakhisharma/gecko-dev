@@ -9,6 +9,7 @@ DIRS += [
 
 DevToolsModules(
     'cell-measurer.js',
+    'cell-size-cache.js',
     'collapse-button.js',
     'console-output.js',
     'console-table.js',

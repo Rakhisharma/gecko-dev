@@ -44,27 +44,25 @@ module.exports = class CellMeasurer extends React.Component {
   }
 
   getRowHeight ({ index }) {
-    if (this._cellSizeCache.hasRowHeight(index)) {
-      return this._cellSizeCache.getRowHeight(index)
-    }
-debugger
-    const { columnCount } = this.props
+    return this._cellSizeCache.getRowHeight(index);
 
-    let maxHeight = 0
+    // const { columnCount } = this.props
 
-    for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-      let { height } = this._measureCell({
-        clientHeight: true,
-        columnIndex,
-        rowIndex: index
-      })
+    // let maxHeight = 0
 
-      maxHeight = Math.max(maxHeight, height)
-    }
+    // for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+    //   let { height } = this._measureCell({
+    //     clientHeight: true,
+    //     columnIndex,
+    //     rowIndex: index
+    //   })
 
-    this._cellSizeCache.setRowHeight(index, maxHeight)
+    //   maxHeight = Math.max(maxHeight, height)
+    // }
 
-    return maxHeight
+    // this._cellSizeCache.setRowHeight(index, maxHeight)
+
+    // return maxHeight
   }
 
   resetMeasurementForColumn (columnIndex) {

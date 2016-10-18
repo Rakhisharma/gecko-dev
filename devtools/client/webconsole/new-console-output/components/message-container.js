@@ -10,6 +10,8 @@
 const {
   createClass,
   createFactory,
+  DOM: dom,
+  findDOMNode,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
 
@@ -45,18 +47,37 @@ const MessageContainer = createClass({
     };
   },
 
-  shouldComponentUpdate(nextProps, nextState) {
-    const repeatChanged = this.props.message.repeat !== nextProps.message.repeat;
-    const openChanged = this.props.open !== nextProps.open;
-    const tableDataChanged = this.props.tableData !== nextProps.tableData;
-    return repeatChanged || openChanged || tableDataChanged;
+  componentDidMount() {
+    this._cacheMessageHeight();
+  },
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   const repeatChanged = this.props.message.repeat !== nextProps.message.repeat;
+  //   const openChanged = this.props.open !== nextProps.open;
+  //   const tableDataChanged = this.props.tableData !== nextProps.tableData;
+  //   return repeatChanged || openChanged || tableDataChanged;
+  // },
+
+  componentDidUpdate() {
+    this._cacheMessageHeight();
+  },
+
+  _cacheMessageHeight() {
+    const node = findDOMNode(this);
+    const height = node.firstChild.scrollHeight;
+    if (height > 0) {
+      console.log(node, height)
+      this.props.updateRowHeight(this.props.message.id, this.props.rowIndex, height);
+    }
   },
 
   render() {
     const { message } = this.props;
 
     let MessageComponent = createFactory(getMessageComponent(message));
-    return MessageComponent(this.props);
+    return dom.div({},
+      MessageComponent(this.props)
+    );
   }
 });
 
