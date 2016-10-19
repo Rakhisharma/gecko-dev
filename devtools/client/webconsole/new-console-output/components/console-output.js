@@ -28,7 +28,6 @@ const {
 const { getScrollSetting } = require("devtools/client/webconsole/new-console-output/selectors/ui");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
-let changedHeights = false;
 const ConsoleOutput = createClass({
 
   displayName: "ConsoleOutput",
@@ -49,11 +48,16 @@ const ConsoleOutput = createClass({
   },
 
   componentDidUpdate() {
-    if (changedHeights) {
-      changedHeights = false;
+    if (this.changedHeights) {
+      this.changedHeights = false;
       this.grid.recomputeGridSize();
       this.grid._updateScrollTopForScrollToRow();
     }
+  },
+
+  _onResize() {
+    this.changedHeights = true;
+    this.forceUpdate();
   },
 
   _updateRowHeight(id, index, height) {
@@ -61,7 +65,7 @@ const ConsoleOutput = createClass({
       || cellSizeCache.getRowHeightById(id) !== height) {
       console.log(id, height, cellSizeCache.getRowHeightById(id))
       cellSizeCache.setRowHeight(id, index, height);
-      changedHeights = true;
+      this.changedHeights = true;
     }
   },
 
@@ -109,7 +113,9 @@ const ConsoleOutput = createClass({
         }
       },
         createElement(AutoSizer,
-          {},
+          {
+            onResize: this._onResize
+          },
           ({ height, width }) => (createElement(CellMeasurer,
             {
               cellRenderer: this._rowRenderer,
