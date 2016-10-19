@@ -28,7 +28,7 @@ module.exports = class CellSizeCache {
   }
 
   hasRowHeightById(id) {
-    return !!this._cachedRowHeights[this.getIdFromIndex(id)];
+    return !!this._cachedRowHeights[id];
   }
 
   setRowHeight(id, index, height) {

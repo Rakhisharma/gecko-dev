@@ -29,6 +29,7 @@ const {
 const { getScrollSetting } = require("devtools/client/webconsole/new-console-output/selectors/ui");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
+let changedHeights = false;
 const ConsoleOutput = createClass({
 
   displayName: "ConsoleOutput",
@@ -49,13 +50,18 @@ const ConsoleOutput = createClass({
   },
 
   componentDidUpdate() {
+    if (changedHeights) {
+      changedHeights = false;
+      this.grid.recomputeGridSize();
+    }
   },
 
   _updateRowHeight(id, index, height) {
     if (!cellSizeCache.hasRowHeightById(id)
-      || cellSizeCache.getRowHeightById(id) != height) {
+      || cellSizeCache.getRowHeightById(id) !== height) {
+      console.log(id, height, cellSizeCache.getRowHeightById(id))
       cellSizeCache.setRowHeight(id, index, height);
-      // @TODO Add a timed updater
+      changedHeights = true;
     }
   },
 
@@ -120,6 +126,10 @@ const ConsoleOutput = createClass({
         rowHeight: getRowHeight,
         scrollToRow: messages.size - 1,
         width: 1280,
+        onScroll: () => {},
+        ref: ref => {
+          this.grid = ref;
+        }
       });
     };
 
@@ -153,6 +163,7 @@ function mapStateToProps(state, props) {
     messagesTableData: getAllMessagesTableDataById(state),
     autoscroll: getScrollSetting(state),
     groups: getAllGroupsById(state),
+    test: Math.random()
   };
 }
 
