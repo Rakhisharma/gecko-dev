@@ -7,7 +7,6 @@
 
 const { l10n } = require("devtools/client/webconsole/new-console-output/utils/messages");
 const { getAllFilters } = require("devtools/client/webconsole/new-console-output/selectors/filters");
-const { getLogLimit } = require("devtools/client/webconsole/new-console-output/selectors/prefs");
 const {
   MESSAGE_TYPE,
   MESSAGE_SOURCE
@@ -15,28 +14,24 @@ const {
 
 function getAllMessages(state) {
   let messages = getAllMessagesById(state);
-  let logLimit = getLogLimit(state);
   let filters = getAllFilters(state);
 
   let groups = getAllGroupsById(state);
   let messagesUI = getAllMessagesUiById(state);
 
-  return prune(
-    messages.filter(message => {
-      return (
-        isInOpenedGroup(message, groups, messagesUI)
-        && (
-          isUnfilterable(message)
-          || (
-            matchLevelFilters(message, filters)
-            && matchNetworkFilters(message, filters)
-            && matchSearchFilters(message, filters)
-          )
+  return messages.filter(message => {
+    return (
+      isInOpenedGroup(message, groups, messagesUI)
+      && (
+        isUnfilterable(message)
+        || (
+          matchLevelFilters(message, filters)
+          && matchNetworkFilters(message, filters)
+          && matchSearchFilters(message, filters)
         )
-      );
-    }),
-    logLimit
-  );
+      )
+    );
+  });
 }
 
 function getAllMessagesById(state) {
@@ -139,26 +134,6 @@ function isTextInFrame(text, frame) {
     .join(":")
     .toLocaleLowerCase()
     .includes(text.toLocaleLowerCase());
-}
-
-function prune(messages, logLimit) {
-  let messageCount = messages.count();
-  if (messageCount > logLimit) {
-    // If the second non-pruned message is in a group,
-    // we want to return the group as the first non-pruned message.
-    let firstIndex = messages.size - logLimit;
-    let groupId = messages.get(firstIndex + 1).groupId;
-
-    if (groupId) {
-      return messages.splice(0, firstIndex + 1)
-        .unshift(
-          messages.findLast((message) => message.id === groupId)
-        );
-    }
-    return messages.splice(0, firstIndex);
-  }
-
-  return messages;
 }
 
 exports.getAllMessages = getAllMessages;
