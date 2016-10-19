@@ -1469,7 +1469,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
         }
         var createStyles = function() {
             if (!stylesCreated) {
-                var css = (animationKeyframes ? animationKeyframes : "") + ".resize-triggers { " + (animationStyle ? animationStyle : "") + 'visibility: hidden; opacity: 0; } .resize-triggers, .resize-triggers > div, .contract-trigger:before { content: " "; display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: -1; } .resize-triggers > div { background: #eee; overflow: auto; } .contract-trigger:before { width: 200%; height: 200%; }', head = document.firstElementChild || document.getElementsByTagName("head")[0], style = document.createElement("style");
+                var css = (animationKeyframes ? animationKeyframes : "") + ".resize-triggers { " + (animationStyle ? animationStyle : "") + 'visibility: hidden; opacity: 0; } .resize-triggers, .resize-triggers > div, .contract-trigger:before { content: " "; display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: -1; } .resize-triggers > div { background: #eee; overflow: auto; } .contract-trigger:before { width: 200%; height: 200%; }', head = document.firstElementChild || document.getElementsByTagName("head")[0], style = document.createElementNS("http://www.w3.org/1999/xhtml", "style");
                 style.type = "text/css", style.styleSheet ? style.styleSheet.cssText = css : style.appendChild(document.createTextNode(css)),
                 head.appendChild(style), stylesCreated = !0;
             }
