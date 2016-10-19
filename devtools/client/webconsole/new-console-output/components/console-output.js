@@ -53,6 +53,7 @@ const ConsoleOutput = createClass({
     if (changedHeights) {
       changedHeights = false;
       this.grid.recomputeGridSize();
+      this.grid._updateScrollTopForScrollToRow();
     }
   },
 
