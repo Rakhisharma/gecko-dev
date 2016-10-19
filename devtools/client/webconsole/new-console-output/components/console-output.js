@@ -14,7 +14,6 @@ const {
 const {
   AutoSizer,
   Grid,
-  List,
 } = require("devtools/client/shared/vendor/react-virtualized");
 const CellMeasurer = require("devtools/client/webconsole/new-console-output/components/cell-measurer");
 const cellSizeCache = new (require("devtools/client/webconsole/new-console-output/components/cell-size-cache"))();
@@ -102,38 +101,6 @@ const ConsoleOutput = createClass({
   render() {
     let {messages} = this.props;
 
-    // const messageList = ({width, height}) => {
-    //   return createElement(List, {
-    //     ref: "List",
-    //     height: 200,
-    //     overscanRowCount: 10,
-    //     rowCount: messages.size,
-    //     rowHeight: 50,
-    //     rowRenderer: this._rowRenderer,
-    //     scrollToIndex: messages.size - 1,
-    //     width,
-    //   });
-    // };
-
-    const messageGrid = ({ getRowHeight }) => {
-      return createElement(Grid, {
-        columnCount: 1,
-        columnWidth: 1280,
-        height: 250,
-        overscanColumnCount: 0,
-        overscanRowCount: 30,
-        cellRenderer: this._rowRenderer,
-        rowCount: messages.size,
-        rowHeight: getRowHeight,
-        scrollToRow: messages.size - 1,
-        width: 1280,
-        onScroll: () => {},
-        ref: ref => {
-          this.grid = ref;
-        }
-      });
-    };
-
     return (
       dom.div({
         className: "webconsole-output",
@@ -141,16 +108,34 @@ const ConsoleOutput = createClass({
           this.outputNode = ref;
         }
       },
-        createElement(CellMeasurer,
-          {
-            cellRenderer: this._rowRenderer,
-            columnCount: 1,
-            width: 1280,
-            rowCount: messages.size,
-            container: this.outputNode ? this.outputNode : document.firstElementChild,
-            cellSizeCache,
-          },
-          messageGrid
+        createElement(AutoSizer,
+          {},
+          ({ height, width }) => (createElement(CellMeasurer,
+            {
+              cellRenderer: this._rowRenderer,
+              columnCount: 1,
+              width,
+              rowCount: messages.size,
+              container: this.outputNode ? this.outputNode : document.firstElementChild,
+              cellSizeCache,
+            },
+            ({ getRowHeight }) => (createElement(Grid, {
+              columnCount: 1,
+              columnWidth: width,
+              height,
+              overscanColumnCount: 0,
+              overscanRowCount: 30,
+              cellRenderer: this._rowRenderer,
+              rowCount: messages.size,
+              rowHeight: getRowHeight,
+              scrollToRow: messages.size - 1,
+              width,
+              onScroll: () => {},
+              ref: ref => {
+                this.grid = ref;
+              }
+            }))
+          ))
         )
       )
     );
