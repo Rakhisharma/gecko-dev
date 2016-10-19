@@ -1475,7 +1475,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
             }
         }, addResizeListener = function(element, fn) {
             attachEvent ? element.attachEvent("onresize", fn) : (element.__resizeTriggers__ || ("static" == getComputedStyle(element).position && (element.style.position = "relative"),
-            createStyles(), element.__resizeLast__ = {}, element.__resizeListeners__ = [], (element.__resizeTriggers__ = document.createElement("div")).className = "resize-triggers",
+            createStyles(), element.__resizeLast__ = {}, element.__resizeListeners__ = [], (element.__resizeTriggers__ = document.createElementNS("http://www.w3.org/1999/xhtml", "div")).className = "resize-triggers",
             element.__resizeTriggers__.innerHTML = '<div class="expand-trigger"><div></div></div><div class="contract-trigger"></div>',
             element.appendChild(element.__resizeTriggers__), resetTriggers(element), element.addEventListener("scroll", scrollListener, !0),
             animationstartevent && element.__resizeTriggers__.addEventListener(animationstartevent, function(e) {
