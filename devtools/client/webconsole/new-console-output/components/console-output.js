@@ -56,6 +56,7 @@ const ConsoleOutput = createClass({
   },
 
   _onResize() {
+    cellSizeCache.clearAllRowHeights();
     this.changedHeights = true;
     this.forceUpdate();
   },
@@ -102,9 +103,45 @@ const ConsoleOutput = createClass({
     });
   },
 
-  render() {
-    let {messages} = this.props;
+  _prepareChildren() {
+    const { messages } = this.props;
+    return createElement(AutoSizer,
+      {
+        onResize: this._onResize
+      },
+      ({ height, width }) => {
+        console.log("width", width);
+        return createElement(CellMeasurer,
+          {
+            cellRenderer: this._rowRenderer,
+            columnCount: 1,
+            width,
+            rowCount: messages.size,
+            container: this.outputNode ? this.outputNode : document.firstElementChild,
+            cellSizeCache,
+          },
+          ({ getRowHeight }) => (createElement(Grid, {
+            columnCount: 1,
+            columnWidth: width,
+            height,
+            overscanColumnCount: 0,
+            overscanRowCount: 5,
+            cellRenderer: this._rowRenderer,
+            rowCount: messages.size,
+            rowHeight: getRowHeight,
+            scrollToRow: messages.size - 1,
+            width,
+            onScroll: () => {},
+            ref: ref => {
+              this.grid = ref;
+            }
+          }))
+        );
+      }
+    );
+  },
 
+  render() {
     return (
       dom.div({
         className: "webconsole-output",
@@ -112,37 +149,7 @@ const ConsoleOutput = createClass({
           this.outputNode = ref;
         }
       },
-        createElement(AutoSizer,
-          {
-            onResize: this._onResize
-          },
-          ({ height, width }) => (createElement(CellMeasurer,
-            {
-              cellRenderer: this._rowRenderer,
-              columnCount: 1,
-              width,
-              rowCount: messages.size,
-              container: this.outputNode ? this.outputNode : document.firstElementChild,
-              cellSizeCache,
-            },
-            ({ getRowHeight }) => (createElement(Grid, {
-              columnCount: 1,
-              columnWidth: width,
-              height,
-              overscanColumnCount: 0,
-              overscanRowCount: 30,
-              cellRenderer: this._rowRenderer,
-              rowCount: messages.size,
-              rowHeight: getRowHeight,
-              scrollToRow: messages.size - 1,
-              width,
-              onScroll: () => {},
-              ref: ref => {
-                this.grid = ref;
-              }
-            }))
-          ))
-        )
+      this._prepareChildren()
       )
     );
   }

@@ -150,13 +150,13 @@ const Message = createClass({
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
 
-    return dom.div({
-      style,
-      className: topLevelClasses.join(" "),
-      ref: node => {
-        this.messageNode = node;
-      }
-    },
+    return dom.div({ style },
+      dom.div({
+        className: topLevelClasses.join(" "),
+        ref: node => {
+          this.messageNode = node;
+        }
+      },
       // @TODO add timestamp
       MessageIndent({indent}),
       icon,
@@ -172,7 +172,7 @@ const Message = createClass({
         ),
         attachment
       )
-    );
+    ));
   }
 });
 
