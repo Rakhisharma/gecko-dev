@@ -24,8 +24,8 @@ const {
   getAllMessagesUiById,
   getAllMessagesTableDataById,
   getAllGroupsById,
+  getLastForceScrollMessageIndex,
 } = require("devtools/client/webconsole/new-console-output/selectors/messages");
-//const { getAutoscrollToRow } = require("devtools/client/webconsole/new-console-output/selectors/ui");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
 const ConsoleOutput = createClass({
@@ -42,19 +42,17 @@ const ConsoleOutput = createClass({
   },
 
   componentDidMount() {
+    this._largestRowIndex = 0;
   },
 
   componentWillUpdate(nextProps, nextState) {
     this.scrollToRow = false;
-    if (this.outputNode) {
-      const outputNode = this.outputNode;
-      // Figure out if the messages should be autoscrolled.
-      if (this.props.messages.size < nextProps.messages.size
-        && outputNode.lastChild
-        && this.props.messages.size - 1 == this._lastRowIndex
-      ) {
-        this.scrollToRow = nextProps.messages.size - 1;
-      }
+    // Figure out if the messages should be autoscrolled.
+    if (this.props.messages.size == 0
+      || !this.stopScrolling
+      || nextProps.lastForceScrollMessageIndex > this.props.messages.size
+    ) {
+      this.scrollToRow = nextProps.messages.size - 1;
     }
   },
 
@@ -73,7 +71,12 @@ const ConsoleOutput = createClass({
   },
 
   _onSectionRendered({ rowStopIndex }) {
-    this._lastRowIndex = rowStopIndex;
+    this.stopScrolling = false;
+    if (rowStopIndex > this._largestRowIndex) {
+      this._largestRowIndex = rowStopIndex;
+    } else if (rowStopIndex < this._largestRowIndex) {
+      this.stopScrolling = true;
+    }
   },
 
   _updateRowHeight(id, index, height) {
@@ -179,7 +182,7 @@ function mapStateToProps(state, props) {
     messages: getAllMessages(state),
     messagesUi: getAllMessagesUiById(state),
     messagesTableData: getAllMessagesTableDataById(state),
-    //autoscrollToRow: getAutoscrollToRow(state),
+    lastForceScrollMessageIndex: getLastForceScrollMessageIndex(state),
     groups: getAllGroupsById(state),
     test: Math.random()
   };

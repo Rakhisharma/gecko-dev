@@ -54,6 +54,12 @@ function getCurrentGroup(state) {
   return state.messages.currentGroup;
 }
 
+function getLastForceScrollMessageIndex(state) {
+  return getAllMessages(state).findLastIndex(message => {
+    return [MESSAGE_TYPE.COMMAND, MESSAGE_TYPE.RESULT].includes(message.type);
+  });
+}
+
 function isUnfilterable(message) {
   return [
     MESSAGE_TYPE.COMMAND,
@@ -136,8 +142,11 @@ function isTextInFrame(text, frame) {
     .includes(text.toLocaleLowerCase());
 }
 
-exports.getAllMessages = getAllMessages;
-exports.getAllMessagesUiById = getAllMessagesUiById;
-exports.getAllMessagesTableDataById = getAllMessagesTableDataById;
-exports.getAllGroupsById = getAllGroupsById;
-exports.getCurrentGroup = getCurrentGroup;
+module.exports = {
+  getAllMessages,
+  getAllMessagesUiById,
+  getAllMessagesTableDataById,
+  getAllGroupsById,
+  getCurrentGroup,
+  getLastForceScrollMessageIndex,
+};
