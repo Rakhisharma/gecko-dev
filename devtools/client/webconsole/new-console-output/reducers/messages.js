@@ -22,6 +22,8 @@ const MessageState = Immutable.Record({
   groupsById: Immutable.Map(),
   // Message id of the current group (no corresponding console.groupEnd yet).
   currentGroup: null,
+  // Last index of a message type that should trigger force scroll.
+  forceScrollToRow: 0,
 });
 
 function messages(state = new MessageState(), action) {
@@ -32,6 +34,10 @@ function messages(state = new MessageState(), action) {
     groupsById,
     currentGroup
   } = state;
+
+  // if (action.type == FORCE_SCROLL) {
+  //   state = state.set("forceScroll", state.messagesById.size - 1);
+  // }
 
   switch (action.type) {
     case constants.MESSAGE_ADD:

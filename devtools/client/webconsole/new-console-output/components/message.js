@@ -40,7 +40,6 @@ const Message = createClass({
     attachment: PropTypes.any,
     stacktrace: PropTypes.any,
     messageId: PropTypes.string,
-    scrollToMessage: PropTypes.bool,
     exceptionDocURL: PropTypes.string,
     serviceContainer: PropTypes.shape({
       emitNewMessage: PropTypes.func.isRequired,
@@ -57,9 +56,6 @@ const Message = createClass({
 
   componentDidMount() {
     if (this.messageNode) {
-      if (this.props.scrollToMessage) {
-        //this.messageNode.scrollIntoView();
-      }
       // Event used in tests. Some message types don't pass it in because existing tests
       // did not emit for them.
       if (this.props.serviceContainer) {
