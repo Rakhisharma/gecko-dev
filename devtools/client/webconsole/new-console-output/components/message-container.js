@@ -66,7 +66,6 @@ const MessageContainer = createClass({
     const node = findDOMNode(this);
     const height = node.firstChild.firstChild.scrollHeight;
     if (height > 0) {
-      console.log(node, height)
       this.props.updateRowHeight(this.props.message.id, this.props.rowIndex, height);
     }
   },

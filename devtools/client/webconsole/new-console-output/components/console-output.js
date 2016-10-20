@@ -64,9 +64,9 @@ const ConsoleOutput = createClass({
   _updateRowHeight(id, index, height) {
     if (!cellSizeCache.hasRowHeightById(id)
       || cellSizeCache.getRowHeightById(id) !== height) {
-      console.log(id, height, cellSizeCache.getRowHeightById(id))
       cellSizeCache.setRowHeight(id, index, height);
       this.changedHeights = true;
+      this.forceUpdate();
     }
   },
 
