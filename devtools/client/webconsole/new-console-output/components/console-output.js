@@ -51,7 +51,7 @@ const ConsoleOutput = createClass({
       // Figure out if the messages should be autoscrolled.
       if (this.props.messages.size < nextProps.messages.size
         && outputNode.lastChild
-      //  && isScrolledToBottom(outputNode.lastChild, outputNode)
+        && this.props.messages.size - 1 == this._lastRowIndex
       ) {
         this.scrollToRow = nextProps.messages.size - 1;
       }
@@ -70,6 +70,10 @@ const ConsoleOutput = createClass({
     cellSizeCache.clearAllRowHeights();
     this.changedHeights = true;
     this.forceUpdate();
+  },
+
+  _onSectionRendered({ rowStopIndex }) {
+    this._lastRowIndex = rowStopIndex;
   },
 
   _updateRowHeight(id, index, height) {
@@ -143,7 +147,8 @@ const ConsoleOutput = createClass({
               onScroll: () => {},
               ref: ref => {
                 this.grid = ref;
-              }
+              },
+              onSectionRendered: this._onSectionRendered,
             };
             if (this.scrollToRow) {
               gridProps.scrollToRow = this.scrollToRow;
