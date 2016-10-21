@@ -16,7 +16,6 @@ const {
   Grid,
 } = require("devtools/client/shared/vendor/react-virtualized");
 const CellMeasurer = require("devtools/client/webconsole/new-console-output/components/cell-measurer");
-const cellSizeCache = new (require("devtools/client/webconsole/new-console-output/components/cell-size-cache"))();
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
 const {KeyShortcuts} = require("devtools/client/shared/key-shortcuts");
@@ -28,6 +27,7 @@ const {
   getAllGroupsById,
   getLastForceScrollMessageIndex,
 } = require("devtools/client/webconsole/new-console-output/selectors/messages");
+const { getCellSizeCache } = require("devtools/client/webconsole/new-console-output/selectors/ui");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
 const ConsoleOutput = createClass({
@@ -118,7 +118,7 @@ const ConsoleOutput = createClass({
   },
 
   _onResize() {
-    cellSizeCache.clearAllRowHeights();
+    this.props.cellSizeCache.clearAllRowHeights();
     this.changedHeights = true;
     this.forceUpdate();
   },
@@ -136,6 +136,7 @@ const ConsoleOutput = createClass({
   },
 
   _updateRowHeight(id, index, height) {
+    const { cellSizeCache } = this.props;
     if (!cellSizeCache.hasRowHeightById(id)
       || cellSizeCache.getRowHeightById(id) !== height) {
       cellSizeCache.setRowHeight(id, index, height);
@@ -190,7 +191,7 @@ const ConsoleOutput = createClass({
             width,
             rowCount: messages.size,
             container: this.outputNode ? this.outputNode : document.firstElementChild,
-            cellSizeCache,
+            cellSizeCache: this.props.cellSizeCache,
           },
           ({ getRowHeight }) => {
             let gridProps = {
@@ -241,6 +242,7 @@ function mapStateToProps(state, props) {
     messagesTableData: getAllMessagesTableDataById(state),
     lastForceScrollMessageIndex: getLastForceScrollMessageIndex(state),
     groups: getAllGroupsById(state),
+    cellSizeCache: getCellSizeCache(state),
     test: Math.random()
   };
 }

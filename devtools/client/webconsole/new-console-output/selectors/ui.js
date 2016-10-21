@@ -10,11 +10,11 @@ function getAllUi(state) {
   return state.ui;
 }
 
-function getAutoscrollToRow(state) {
-  return getAllUi(state).autoscrollToRow;
+function getCellSizeCache(state) {
+  return getAllUi(state).cellSizeCache;
 }
 
 module.exports = {
   getAllUi,
-  getAutoscrollToRow,
+  getCellSizeCache,
 };
