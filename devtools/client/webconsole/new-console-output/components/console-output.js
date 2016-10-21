@@ -19,6 +19,8 @@ const CellMeasurer = require("devtools/client/webconsole/new-console-output/comp
 const cellSizeCache = new (require("devtools/client/webconsole/new-console-output/components/cell-size-cache"))();
 const { connect } = require("devtools/client/shared/vendor/react-redux");
 
+const {KeyShortcuts} = require("devtools/client/shared/key-shortcuts");
+
 const {
   getAllMessages,
   getAllMessagesUiById,
@@ -37,16 +39,34 @@ const ConsoleOutput = createClass({
     messagesUi: PropTypes.object.isRequired,
     serviceContainer: PropTypes.shape({
       attachRefToHud: PropTypes.func.isRequired,
+      autocompletePopupIsOpen: PropTypes.func.isRequired,
     }),
     autoscrollToRow: PropTypes.number,
   },
 
   componentDidMount() {
     this._largestRowIndex = 0;
+
+    this.shortcuts = new KeyShortcuts({ window });
+    [
+      "Home",
+      "End",
+      "PageDown",
+      "PageUp"
+    ].forEach((key) => this.shortcuts.on(key, this._onShortcut));
+  },
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      messages: nextProps.messages,
+    });
   },
 
   componentWillUpdate(nextProps, nextState) {
-    this.scrollToRow = false;
+    if (this.scrollToRow !== false) {
+      return;
+    }
+
     // Figure out if the messages should be autoscrolled.
     if (this.props.messages.size == 0
       || !this.stopScrolling
@@ -62,6 +82,39 @@ const ConsoleOutput = createClass({
       this.grid.recomputeGridSize();
       this.grid._updateScrollTopForScrollToRow();
     }
+
+    // Clear out props/state used for imperative scrolling.
+    this.scrollToRow = false;
+    this._scrollToAlignment = null;
+  },
+
+  _onShortcut(name, event) {
+    // Only respond to events where JSTerm is the target and the autocomplete is not open.
+    if (!event.target.closest("textbox.jsterm-input-node")
+        || this.props.serviceContainer.autocompletePopupIsOpen()) {
+      return;
+    }
+
+    switch (name) {
+      case "PageDown":
+        this.scrollToRow = this.rowStopIndex;
+        this._scrollToAlignment = "start";
+        break;
+      case "PageUp":
+        this.scrollToRow = this.rowStartIndex;
+        this._scrollToAlignment = "end";
+        break;
+      case "Home":
+        this.scrollToRow = 0;
+        this._scrollToAlignment = "start";
+        break;
+      case "End":
+        this.scrollToRow = this.state.messages.size - 1;
+        this._scrollToAlignment = "end";
+        break;
+    }
+
+    this.forceUpdate();
   },
 
   _onResize() {
@@ -70,8 +123,11 @@ const ConsoleOutput = createClass({
     this.forceUpdate();
   },
 
-  _onSectionRendered({ rowStopIndex }) {
+  _onSectionRendered({ rowStartIndex, rowStopIndex }) {
     this.stopScrolling = false;
+
+    this.rowStartIndex = rowStartIndex;
+    this.rowStopIndex = rowStopIndex;
     if (rowStopIndex > this._largestRowIndex) {
       this._largestRowIndex = rowStopIndex;
     } else if (rowStopIndex < this._largestRowIndex) {
@@ -152,8 +208,9 @@ const ConsoleOutput = createClass({
                 this.grid = ref;
               },
               onSectionRendered: this._onSectionRendered,
+              scrollToAlignment: this._scrollToAlignment || "auto"
             };
-            if (this.scrollToRow) {
+            if (this.scrollToRow !== false) {
               gridProps.scrollToRow = this.scrollToRow;
             }
             return createElement(Grid, gridProps);
