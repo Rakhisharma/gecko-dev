@@ -54,6 +54,9 @@ const ConsoleOutput = createClass({
       "PageDown",
       "PageUp"
     ].forEach((key) => this.shortcuts.on(key, this._onShortcut));
+
+    // Used in mochitests.
+    this.props.serviceContainer.attachRefToHud("outputScroller", this.outputNode);
   },
 
   componentWillReceiveProps(nextProps) {
