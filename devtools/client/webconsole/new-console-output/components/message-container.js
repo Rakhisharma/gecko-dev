@@ -8,10 +8,10 @@
 
 // React & Redux
 const {
-  createClass,
   createFactory,
   DOM: dom,
-  PropTypes
+  PropTypes,
+  PureComponent
 } = require("devtools/client/shared/vendor/react");
 const { findDOMNode } = require("devtools/client/shared/vendor/react-dom");
 
@@ -30,37 +30,24 @@ const componentMap = new Map([
   ["PageError", require("./message-types/page-error")]
 ]);
 
-const MessageContainer = createClass({
-  displayName: "MessageContainer",
+class MessageContainer extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {isToggleOn: true};
 
-  propTypes: {
-    message: PropTypes.object.isRequired,
-    open: PropTypes.bool.isRequired,
-    serviceContainer: PropTypes.object.isRequired,
-    indent: PropTypes.number.isRequired,
-  },
-
-  getDefaultProps: function () {
-    return {
-      open: false,
-      indent: 0,
-    };
-  },
+    // This binding is necessary to make `this` work in the callback
+    this._cacheMessageHeight = this._cacheMessageHeight.bind(this);
+  }
 
   componentDidMount() {
+    // Record the initial height of the content inside the message.
     this._cacheMessageHeight();
-  },
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   const repeatChanged = this.props.message.repeat !== nextProps.message.repeat;
-  //   const openChanged = this.props.open !== nextProps.open;
-  //   const tableDataChanged = this.props.tableData !== nextProps.tableData;
-  //   return repeatChanged || openChanged || tableDataChanged;
-  // },
+  }
 
   componentDidUpdate() {
+    // Capture height changes from toggling.
     this._cacheMessageHeight();
-  },
+  }
 
   _cacheMessageHeight() {
     const node = findDOMNode(this);
@@ -68,7 +55,7 @@ const MessageContainer = createClass({
     if (height > 0) {
       this.props.updateRowHeight(this.props.message.id, this.props.rowIndex, height);
     }
-  },
+  }
 
   render() {
     const { message } = this.props;
@@ -78,7 +65,12 @@ const MessageContainer = createClass({
       MessageComponent(this.props)
     );
   }
-});
+}
+
+MessageContainer.defaultProps = {
+  open: false,
+  indent: 0,
+};
 
 function getMessageComponent(message) {
   switch (message.source) {
