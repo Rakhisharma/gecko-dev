@@ -8,9 +8,10 @@ const {
   createElement,
   createFactory,
   DOM: dom,
-  findDOMNode,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
+const { findDOMNode } = require("devtools/client/shared/vendor/react-dom");
+
 const {
   AutoSizer,
   Grid,
