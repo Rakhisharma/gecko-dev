@@ -56,7 +56,7 @@ const ConsoleOutput = createClass({
     ].forEach((key) => this.shortcuts.on(key, this._onShortcut));
 
     // Used in mochitests.
-    this.props.serviceContainer.attachRefToHud("outputScroller", this.outputNode);
+    this.props.serviceContainer.attachRefToHud("outputScroller", findDOMNode(this.grid));
   },
 
   componentWillReceiveProps(nextProps) {
