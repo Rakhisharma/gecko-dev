@@ -548,7 +548,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
     function(module, exports, __webpack_require__) {
         var isObject = __webpack_require__(22), document = __webpack_require__(12).document, is = isObject(document) && isObject(document.createElement);
         module.exports = function(it) {
-            return is ? document.createElement(it) : {};
+            return is ? document.createElementNS("http://www.w3.org/1999/xhtml", it) : {};
         };
     }, /* 27 */
     /***/
@@ -1459,7 +1459,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
                         }));
                     });
                 }
-            }, animation = !1, animationstring = "animation", keyframeprefix = "", animationstartevent = "animationstart", domPrefixes = "Webkit Moz O ms".split(" "), startEvents = "webkitAnimationStart animationstart oAnimationStart MSAnimationStart".split(" "), pfx = "", elm = document.createElement("fakeelement");
+            }, animation = !1, animationstring = "animation", keyframeprefix = "", animationstartevent = "animationstart", domPrefixes = "Webkit Moz O ms".split(" "), startEvents = "webkitAnimationStart animationstart oAnimationStart MSAnimationStart".split(" "), pfx = "", elm = document.createElementNS("http://www.w3.org/1999/xhtml", "fakeelement");
             if (void 0 !== elm.style.animationName && (animation = !0), animation === !1) for (var i = 0; i < domPrefixes.length; i++) if (void 0 !== elm.style[domPrefixes[i] + "AnimationName"]) {
                 pfx = domPrefixes[i], animationstring = pfx + "Animation", keyframeprefix = "-" + pfx.toLowerCase() + "-",
                 animationstartevent = startEvents[i], animation = !0;
@@ -1629,7 +1629,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
             }, {
                 key: "_renderAndMount",
                 value: function() {
-                    this._div || (this._div = document.createElement("div"), this._div.style.display = "inline-block",
+                    this._div || (this._div = document.createElementNS("http://www.w3.org/1999/xhtml", "div"), this._div.style.display = "inline-block",
                     this._div.style.position = "absolute", this._div.style.visibility = "hidden", this._div.style.zIndex = -1,
                     this._updateDivDimensions(this.props), this._containerNode = this._getContainerNode(this.props),
                     this._containerNode.appendChild(this._div));
