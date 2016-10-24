@@ -89,10 +89,10 @@ function BrowserLoaderBuilder({ baseURI, window, useOnlyShared }) {
   const dynamicPaths = {};
   const componentProxies = new Map();
 
-  if (AppConstants.DEBUG || AppConstants.DEBUG_JS_MODULES) {
-    dynamicPaths["devtools/client/shared/vendor/react"] =
-      "resource://devtools/client/shared/vendor/react-dev";
-  }
+  // if (AppConstants.DEBUG || AppConstants.DEBUG_JS_MODULES) {
+  //   dynamicPaths["devtools/client/shared/vendor/react"] =
+  //     "resource://devtools/client/shared/vendor/react-dev";
+  // }
 
   const opts = {
     id: "browser-loader",
