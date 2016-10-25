@@ -214,6 +214,56 @@ Damp.prototype = {
     yield this.testTeardown();
   }),
 
+  // Log messages with lots of Reps.
+  _repStressTest: Task.async(function*() {
+    let TOTAL_MESSAGES = 10;
+    let tab = yield this.testSetup(SIMPLE_URL);
+    let messageManager = tab.linkedBrowser.messageManager;
+    let {toolbox} = yield this.openToolbox("webconsole");
+    let webconsole = toolbox.getPanel("webconsole");
+
+    // Resolve once the last message has been received.
+    let allMessagesReceived = new Promise(resolve => {
+      function receiveMessages(e, messages) {
+        for (let m of messages) {
+          if (m.node.textContent.includes("damp " + TOTAL_MESSAGES)) {
+            webconsole.hud.ui.off("new-messages", receiveMessages);
+            // Wait for the console to redraw
+            requestAnimationFrame(resolve);
+          }
+        }
+      }
+      webconsole.hud.ui.on("new-messages", receiveMessages);
+    });
+
+    // Load a frame script using a data URI so we can do logs
+    // from the page.  So this is running in content.
+    messageManager.loadFrameScript("data:,(" + encodeURIComponent(
+      `function () {
+        addMessageListener("do-logs", function () {
+          for (var i = 0; i < ${TOTAL_MESSAGES}; i++) {
+            content.console.log('damp', ...Array(1000).fill(i + 1));
+          }
+        });
+      }`
+    ) + ")()", true);
+
+    // Kick off the logging
+    messageManager.sendAsyncMessage("do-logs");
+
+    let start = performance.now();
+    yield allMessagesReceived;
+    let end = performance.now();
+
+    this._results.push({
+      name: "console.repStressTest",
+      value: end - start
+    });
+
+    yield this.closeToolbox(null);
+    yield this.testTeardown();
+  }),
+
   takeCensus: function(label) {
     let start = performance.now();
 
@@ -456,6 +506,9 @@ Damp.prototype = {
     }
     if (config.subtests.indexOf("consoleStreamLogging") > -1) {
       tests = tests.concat(this._consoleStreamLoggingTest);
+    }
+    if (config.subtests.indexOf("repStressTest") > -1) {
+      tests = tests.concat(this._repStressTest);
     }
     this._doSequence(tests, this._doneInternal);
   }

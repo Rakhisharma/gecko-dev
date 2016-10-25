@@ -19,6 +19,7 @@ var defaultConfig = {
     saveAndReadHeapSnapshot: false,
     consoleBulkLogging: true,
     consoleStreamLogging: false,
+    repStressTest: true,
   }
 };
 
@@ -32,6 +33,7 @@ var testsInfo = {
   saveAndReadHeapSnapshot: "Measure open/close toolbox on memory panel and save/read heap snapshot",
   consoleBulkLogging: "Measure time for a bunch of sync console.log statements to appear",
   consoleStreamLogging: "Measure rAF on page during a stream of console.log statements",
+  repStressTest: "Stress test Rep mounting",
 };
 
 function updateConfig() {
