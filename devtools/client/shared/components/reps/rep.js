@@ -76,20 +76,10 @@ define(function (require, exports, module) {
    * to the current value type. The value must be passed is as 'object'
    * property.
    */
-  const Rep = React.createClass({
-    displayName: "Rep",
-
-    propTypes: {
-      object: React.PropTypes.any,
-      defaultRep: React.PropTypes.object,
-      mode: React.PropTypes.string
-    },
-
-    render: function () {
-      let rep = getRep(this.props.object, this.props.defaultRep);
-      return rep(this.props);
-    },
-  });
+  function Rep(props) {
+    let rep = getRep(props.object, props.defaultRep);
+    return rep(props);
+  }
 
   // Helpers
 
