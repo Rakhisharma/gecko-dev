@@ -51,18 +51,20 @@ class MessageContainer extends PureComponent {
 
   _cacheMessageHeight() {
     const node = findDOMNode(this);
-    const height = node.firstChild.firstChild.scrollHeight;
+    const height = node.firstChild.firstChild.firstChild.scrollHeight;
     if (height > 0) {
       this.props.updateRowHeight(this.props.message.id, this.props.rowIndex, height);
     }
   }
 
   render() {
-    const { message } = this.props;
+    const { message, style } = this.props;
 
     let MessageComponent = createFactory(getMessageComponent(message));
     return dom.div({},
-      MessageComponent(this.props)
+      dom.div({ style },
+        MessageComponent(this.props)
+      )
     );
   }
 }

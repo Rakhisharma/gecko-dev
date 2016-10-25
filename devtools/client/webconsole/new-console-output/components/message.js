@@ -71,7 +71,6 @@ const Message = createClass({
 
   render() {
     const {
-      style,
       messageId,
       open,
       collapsible,
@@ -146,7 +145,7 @@ const Message = createClass({
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
 
-    return dom.div({ style },
+    return dom.div({ },
       dom.div({
         className: topLevelClasses.join(" "),
         ref: node => {
