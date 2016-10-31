@@ -62,9 +62,9 @@ const Message = createClass({
       if (this.props.serviceContainer) {
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
       }
-      if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache) {
-        debugger
-        this.props.messageBodyCache.set(this.props.messageId, ReactDOMServer.renderToString(dom.span({}, this.props.messageBody)));
+      if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache && !this.props.messageBodyCache.get(this.props.messageId)) {
+        const messageBody = this.messageNode.querySelector(".message-body");
+        this.props.messageBodyCache.set(this.props.messageId, messageBody.outerHTML);
       }
     }
   },
@@ -149,7 +149,7 @@ const Message = createClass({
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
 
-    let messageBody = typeof this.props.messageBody === "string"
+    let messageBody = this.props.messageBodyCache && this.props.messageBodyCache.get(messageId)
       ? dom.span({
         dangerouslySetInnerHTML: {"__html": this.props.messageBody}
       })
