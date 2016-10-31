@@ -13,7 +13,6 @@ const {
   DOM: dom,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
-const ReactDOMServer = require("devtools/client/shared/vendor/react-dom-server");
 const { l10n } = require("devtools/client/webconsole/new-console-output/utils/messages");
 const actions = require("devtools/client/webconsole/new-console-output/actions/index");
 const CollapseButton = createFactory(require("devtools/client/webconsole/new-console-output/components/collapse-button"));
@@ -22,6 +21,7 @@ const MessageIcon = createFactory(require("devtools/client/webconsole/new-consol
 const MessageRepeat = createFactory(require("devtools/client/webconsole/new-console-output/components/message-repeat"));
 const FrameView = createFactory(require("devtools/client/shared/components/frame"));
 const StackTrace = createFactory(require("devtools/client/shared/components/stack-trace"));
+const {openVariablesView} = require("devtools/client/webconsole/new-console-output/utils/variables-view");
 
 const Message = createClass({
   displayName: "Message",
@@ -63,8 +63,8 @@ const Message = createClass({
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
       }
       if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache && !this.props.messageBodyCache.get(this.props.messageId)) {
-        const messageBody = ReactDOMServer.renderToString(dom.span({}, this.props.messageBody));
-        debugger
+//        const messageBody = ReactDOMServer.renderToString(dom.span({}, this.props.messageBody));
+        const messageBody = this.messageNode.querySelector(".message-body").outerHTML;
         this.props.messageBodyCache.set(this.props.messageId, messageBody);
       }
     }
@@ -169,7 +169,7 @@ const Message = createClass({
       collapse,
       dom.span({ className: "message-body-wrapper" },
         dom.span({ className: "message-flex-body" },
-          dom.span({ className: "message-body devtools-monospace" },
+          dom.span({ onClick: handleMessageClick, className: "message-body devtools-monospace" },
             messageBody,
             learnMore
           ),
@@ -181,5 +181,9 @@ const Message = createClass({
     ));
   }
 });
+
+function handleMessageClick(e) {
+  openVariablesView(e.nativeEvent.explicitOriginalTarget.parentNode.dataset.actor);
+}
 
 module.exports = Message;
