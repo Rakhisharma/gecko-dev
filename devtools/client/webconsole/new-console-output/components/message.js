@@ -13,6 +13,7 @@ const {
   DOM: dom,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
+const ReactDOMServer = require("devtools/client/shared/vendor/react-dom-server");
 const { l10n } = require("devtools/client/webconsole/new-console-output/utils/messages");
 const actions = require("devtools/client/webconsole/new-console-output/actions/index");
 const CollapseButton = createFactory(require("devtools/client/webconsole/new-console-output/components/collapse-button"));
@@ -61,6 +62,10 @@ const Message = createClass({
       if (this.props.serviceContainer) {
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
       }
+      if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache) {
+        debugger
+        this.props.messageBodyCache.set(this.props.messageId, ReactDOMServer.renderToString(dom.span({}, this.props.messageBody)));
+      }
     }
   },
 
@@ -80,7 +85,6 @@ const Message = createClass({
       level,
       indent,
       topLevelClasses,
-      messageBody,
       frame,
       stacktrace,
       serviceContainer,
@@ -144,6 +148,12 @@ const Message = createClass({
         onClick: this.onLearnMoreClick,
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
+
+    let messageBody = typeof this.props.messageBody === "string"
+      ? dom.span({
+        dangerouslySetInnerHTML: {"__html": this.props.messageBody}
+      })
+      : this.props.messageBody;
 
     return dom.div({ },
       dom.div({

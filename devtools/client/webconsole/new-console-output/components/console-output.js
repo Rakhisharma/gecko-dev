@@ -31,6 +31,8 @@ const {
 const { getCellSizeCache } = require("devtools/client/webconsole/new-console-output/selectors/ui");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
+const messageBodyCache = new Map();
+
 const ConsoleOutput = createClass({
 
   displayName: "ConsoleOutput",
@@ -177,6 +179,7 @@ const ConsoleOutput = createClass({
       style,
       updateRowHeight: this._updateRowHeight,
       rowIndex,
+      messageBodyCache,
     });
   },
 

@@ -41,6 +41,7 @@ function ConsoleApiCall(props) {
     tableData,
     serviceContainer,
     indent,
+    messageBodyCache,
   } = props;
   const {
     id: messageId,
@@ -56,7 +57,9 @@ function ConsoleApiCall(props) {
   } = message;
 
   let messageBody;
-  if (type === "trace") {
+  if (messageBodyCache.has(messageId)) {
+    messageBody = messageBodyCache.get(messageId);
+  } else if (type === "trace") {
     messageBody = dom.span({className: "cm-variable"}, "console.trace()");
   } else if (type === "assert") {
     let reps = formatReps(parameters);
@@ -108,6 +111,7 @@ function ConsoleApiCall(props) {
     serviceContainer,
     dispatch,
     indent,
+    messageBodyCache,
   });
 }
 
