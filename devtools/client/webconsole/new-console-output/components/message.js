@@ -63,8 +63,9 @@ const Message = createClass({
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
       }
       if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache && !this.props.messageBodyCache.get(this.props.messageId)) {
-        const messageBody = this.messageNode.querySelector(".message-body");
-        this.props.messageBodyCache.set(this.props.messageId, messageBody.outerHTML);
+        const messageBody = ReactDOMServer.renderToString(dom.span({}, this.props.messageBody));
+        debugger
+        this.props.messageBodyCache.set(this.props.messageId, messageBody);
       }
     }
   },
