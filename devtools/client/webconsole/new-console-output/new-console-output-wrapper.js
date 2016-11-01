@@ -37,6 +37,7 @@ NewConsoleOutputWrapper.prototype = {
     let childComponent = ConsoleOutput({
       serviceContainer: {
         attachRefToHud,
+        autocompletePopupIsOpen: () => this.jsterm.autocompletePopup.isOpen,
         emitNewMessage: (node, messageId) => {
           this.jsterm.hud.emit("new-messages", new Set([{
             node,

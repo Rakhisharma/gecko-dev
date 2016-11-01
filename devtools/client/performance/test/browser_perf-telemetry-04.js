@@ -11,6 +11,12 @@ const { initPerformanceInTab, initConsoleInNewTab, teardownToolboxAndRemoveTab }
 const { waitForRecordingStartedEvents, waitForRecordingStoppedEvents } = require("devtools/client/performance/test/helpers/actions");
 
 add_task(function* () {
+  yield SpecialPowers.pushPrefEnv({
+    "set": [
+      // Use the split console so console messages will be rendered immediately
+      ["devtools.toolbox.splitconsoleEnabled", true],
+    ]
+  });
   let { target, console } = yield initConsoleInNewTab({
     url: SIMPLE_URL,
     win: window

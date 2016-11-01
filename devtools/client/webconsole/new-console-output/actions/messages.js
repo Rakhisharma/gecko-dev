@@ -11,6 +11,7 @@ const {
 } = require("devtools/client/webconsole/new-console-output/utils/messages");
 const { IdGenerator } = require("devtools/client/webconsole/new-console-output/utils/id-generator");
 const { batchActions } = require("devtools/client/webconsole/new-console-output/actions/enhancers");
+const { clearCaches } = require("devtools/client/webconsole/new-console-output/utils/caches");
 const {
   MESSAGE_ADD,
   MESSAGES_CLEAR,
@@ -33,8 +34,14 @@ function messageAdd(packet, idGenerator = null) {
   };
 
   if (message.type === MESSAGE_TYPE.CLEAR) {
+    clearCaches();
+
     return batchActions([
-      messagesClear(),
+      // @TODO make batchActions support thunks so we can use messagesClear() instead.
+      // See https://github.com/abc123s/redux-batch-enhancer
+      {
+        type: MESSAGES_CLEAR
+      },
       addMessageAction,
     ]);
   }
@@ -42,8 +49,12 @@ function messageAdd(packet, idGenerator = null) {
 }
 
 function messagesClear() {
-  return {
-    type: MESSAGES_CLEAR
+  return (dispatch) => {
+    clearCaches();
+
+    dispatch({
+      type: MESSAGES_CLEAR
+    });
   };
 }
 

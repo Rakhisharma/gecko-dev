@@ -10,7 +10,7 @@
 const TEST_URI =
   `data:text/html;charset=utf-8,<p>Test keyboard accessibility</p>
   <script>
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 99; i++) {
       console.log("console message " + i);
     }
   </script>
@@ -20,35 +20,30 @@ add_task(function* () {
   let hud = yield openNewTabAndConsole(TEST_URI);
   info("Web Console opened");
 
-  const outputScroller = hud.ui.outputScroller;
-
-  yield waitFor(() => findMessages(hud, "").length == 100);
-
-  let currentPosition = outputScroller.scrollTop;
-  const bottom = currentPosition;
+  yield waitFor(() => findMessage(hud, "console message 99"));
+  ok(!findMessage(hud, "console message 1"), "output is scrolled to bottom");
 
   EventUtils.sendMouseEvent({type: "click"}, hud.jsterm.inputNode);
 
   // Page up.
   EventUtils.synthesizeKey("VK_PAGE_UP", {});
-  isnot(outputScroller.scrollTop, currentPosition,
-    "scroll position changed after page up");
+  yield waitFor(() => !findMessage(hud, "console message 99"));
+  ok(true, "scroll position changed after page up");
 
   // Page down.
-  currentPosition = outputScroller.scrollTop;
   EventUtils.synthesizeKey("VK_PAGE_DOWN", {});
-  ok(outputScroller.scrollTop > currentPosition,
-     "scroll position now at bottom");
+  yield waitFor(() => findMessage(hud, "console message 99"));
+  ok(true, "scroll position changed after page down");
 
   // Home
   EventUtils.synthesizeKey("VK_HOME", {});
-  is(outputScroller.scrollTop, 0, "scroll position now at top");
+  yield waitFor(() => findMessage(hud, "console message 1"));
+  ok(true, "scroll position at top after home");
 
   // End
   EventUtils.synthesizeKey("VK_END", {});
-  let scrollTop = outputScroller.scrollTop;
-  ok(scrollTop > 0 && Math.abs(scrollTop - bottom) <= 5,
-     "scroll position now at bottom");
+  yield waitFor(() => findMessage(hud, "console message 99"));
+  ok(true, "scroll position at bottom after end");
 
   // Clear output
   info("try ctrl-l to clear output");
@@ -66,6 +61,6 @@ add_task(function* () {
   info("try ctrl-f to focus filter");
   synthesizeKeyShortcut(WCUL10n.getStr("webconsole.find.key"));
   ok(!hud.jsterm.inputNode.getAttribute("focused"), "jsterm input is not focused");
-  is(hud.ui.filterBox, outputScroller.ownerDocument.activeElement,
+  is(hud.ui.filterBox, hud.jsterm.inputNode.ownerDocument.activeElement,
     "filter input is focused");
 });

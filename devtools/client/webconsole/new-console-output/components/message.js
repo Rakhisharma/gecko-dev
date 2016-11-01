@@ -21,6 +21,8 @@ const MessageIcon = createFactory(require("devtools/client/webconsole/new-consol
 const MessageRepeat = createFactory(require("devtools/client/webconsole/new-console-output/components/message-repeat"));
 const FrameView = createFactory(require("devtools/client/shared/components/frame"));
 const StackTrace = createFactory(require("devtools/client/shared/components/stack-trace"));
+const {openVariablesView} = require("devtools/client/webconsole/new-console-output/utils/variables-view");
+const { messageBodyCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
 
 const Message = createClass({
   displayName: "Message",
@@ -35,12 +37,12 @@ const Message = createClass({
     indent: PropTypes.number.isRequired,
     topLevelClasses: PropTypes.array.isRequired,
     messageBody: PropTypes.any.isRequired,
+    cacheMessageBody: PropTypes.bool,
     repeat: PropTypes.any,
     frame: PropTypes.any,
     attachment: PropTypes.any,
     stacktrace: PropTypes.any,
     messageId: PropTypes.string,
-    scrollToMessage: PropTypes.bool,
     exceptionDocURL: PropTypes.string,
     serviceContainer: PropTypes.shape({
       emitNewMessage: PropTypes.func.isRequired,
@@ -57,11 +59,21 @@ const Message = createClass({
 
   componentDidMount() {
     if (this.messageNode) {
-      if (this.props.scrollToMessage) {
-        this.messageNode.scrollIntoView();
+      // When lots of Reps are output in the same message, it can make scrolling janky.
+      // With virtualization, we mount the node each time it comes into view, and mounting
+      // lots of Reps is slow. To make it faster, cache message bodies as HTML strings and
+      // reuse that when scrolling. Note, this does cause issues for click handlers inside
+      // of Reps. See handleMessageClick below.
+      if (this.props.cacheMessageBody
+        && !messageBodyCache.getMessageBody(this.props.messageId)) {
+        const messageBody = this.messageNode.querySelector(".message-body").firstChild.innerHTML;
+        messageBodyCache.setMessageBody(this.props.messageId, messageBody);
       }
+
       // Event used in tests. Some message types don't pass it in because existing tests
-      // did not emit for them.
+      // did not emit for them. Note, this is not guarenteed to emit even after a message
+      // is recorded, due to virtualization. It also may emit more than once for the same
+      // message if the message is scrolled into view more than once.
       if (this.props.serviceContainer) {
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
       }
@@ -149,20 +161,23 @@ const Message = createClass({
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
 
-    return dom.div({
-      className: topLevelClasses.join(" "),
-      ref: node => {
-        this.messageNode = node;
-      }
-    },
+    return dom.div({ },
+      dom.div({
+        className: topLevelClasses.join(" "),
+        ref: node => {
+          this.messageNode = node;
+        }
+      },
       // @TODO add timestamp
       MessageIndent({indent}),
       icon,
       collapse,
       dom.span({ className: "message-body-wrapper" },
         dom.span({ className: "message-flex-body" },
-          dom.span({ className: "message-body devtools-monospace" },
-            messageBody,
+          dom.span({ onClick: handleMessageClick, className: "message-body devtools-monospace" },
+            // This wrapping span makes it easy to select the message body contents for
+            // caching, and also matches the span required for dangerouslySetInnerHTML.
+            dom.span({}, messageBody),
             learnMore
           ),
           repeat,
@@ -170,8 +185,18 @@ const Message = createClass({
         ),
         attachment
       )
-    );
+    ));
   }
 });
+
+function handleMessageClick(e) {
+  if (!e.nativeEvent.explicitOriginalTarget) {
+    return;
+  }
+  let clickedNode = e.nativeEvent.explicitOriginalTarget.parentNode;
+  if (clickedNode.dataset.actor) {
+    openVariablesView(clickedNode.dataset.actor);
+  }
+}
 
 module.exports = Message;

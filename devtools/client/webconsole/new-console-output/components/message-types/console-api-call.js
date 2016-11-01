@@ -18,6 +18,8 @@ const {isGroupType, l10n} = require("devtools/client/webconsole/new-console-outp
 
 const Message = createFactory(require("devtools/client/webconsole/new-console-output/components/message"));
 
+const { messageBodyCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
+
 ConsoleApiCall.displayName = "ConsoleApiCall";
 
 ConsoleApiCall.propTypes = {
@@ -34,6 +36,7 @@ ConsoleApiCall.defaultProps = {
 
 function ConsoleApiCall(props) {
   const {
+    style,
     dispatch,
     message,
     open,
@@ -55,7 +58,11 @@ function ConsoleApiCall(props) {
   } = message;
 
   let messageBody;
-  if (type === "trace") {
+  if (messageBodyCache.hasMessageBody(messageId)) {
+    messageBody = dom.span({
+      dangerouslySetInnerHTML: {"__html": messageBodyCache.getMessageBody(messageId)}
+    });
+  } else if (type === "trace") {
     messageBody = dom.span({className: "cm-variable"}, "console.trace()");
   } else if (type === "assert") {
     let reps = formatReps(parameters);
@@ -90,6 +97,7 @@ function ConsoleApiCall(props) {
   const topLevelClasses = ["cm-s-mozilla"];
 
   return Message({
+    style,
     messageId,
     open,
     collapsible,
@@ -99,6 +107,7 @@ function ConsoleApiCall(props) {
     level,
     topLevelClasses,
     messageBody,
+    cacheMessageBody: true,
     repeat,
     frame,
     stacktrace,

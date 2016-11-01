@@ -16,19 +16,28 @@ const {
   PREFS,
 } = require("devtools/client/webconsole/new-console-output/constants");
 
+const { cellSizeCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
+
 function filterTextSet(text) {
-  return {
-    type: FILTER_TEXT_SET,
-    text
+  return (dispatch) => {
+    cellSizeCache.clearAllRowHeights();
+
+    dispatch({
+      type: FILTER_TEXT_SET,
+      text
+    });
   };
 }
 
 function filterToggle(filter) {
   return (dispatch, getState) => {
+    cellSizeCache.clearAllRowHeights();
+
     dispatch({
       type: FILTER_TOGGLE,
       filter,
     });
+
     const filterState = getAllFilters(getState());
     Services.prefs.setBoolPref(PREFS.FILTER[filter.toUpperCase()],
       filterState.get(filter));
@@ -37,6 +46,8 @@ function filterToggle(filter) {
 
 function filtersClear() {
   return (dispatch, getState) => {
+    cellSizeCache.clearAllRowHeights();
+
     dispatch({
       type: FILTERS_CLEAR,
     });

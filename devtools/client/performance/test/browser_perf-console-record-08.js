@@ -43,6 +43,12 @@ add_task(function* () {
   // This test seems to take a very long time to finish on Linux VMs.
   requestLongerTimeout(4);
 
+  yield SpecialPowers.pushPrefEnv({
+    "set": [
+      // Use the split console so console messages will be rendered immediately
+      ["devtools.toolbox.splitconsoleEnabled", true],
+    ]
+  });
   let { target, console } = yield initConsoleInNewTab({
     url: SIMPLE_URL,
     win: window

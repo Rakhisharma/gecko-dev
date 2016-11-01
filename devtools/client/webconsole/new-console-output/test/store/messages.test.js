@@ -97,22 +97,6 @@ describe("Message reducer:", () => {
       expect(messages.size).toBe(0);
     });
 
-    it("limits the number of messages displayed", () => {
-      const { dispatch, getState } = setupStore([]);
-
-      const logLimit = 1000;
-      const packet = stubPackets.get("console.log(undefined)");
-      for (let i = 1; i <= logLimit + 1; i++) {
-        packet.message.arguments = [`message num ${i}`];
-        dispatch(actions.messageAdd(packet));
-      }
-
-      const messages = getAllMessages(getState());
-      expect(messages.count()).toBe(logLimit);
-      expect(messages.first().parameters[0]).toBe(`message num 2`);
-      expect(messages.last().parameters[0]).toBe(`message num ${logLimit + 1}`);
-    });
-
     it("does not add null messages to the store", () => {
       const { dispatch, getState } = setupStore([]);
 
@@ -179,28 +163,6 @@ describe("Message reducer:", () => {
 
       const messages = getAllMessages(getState());
       expect(messages.size).toBe(1);
-    });
-
-    it("shows the group of the first displayed message when messages are pruned", () => {
-      const { dispatch, getState } = setupStore([]);
-
-      const logLimit = 1000;
-
-      const groupMessage = stubPreparedMessages.get("console.group('bar')");
-      dispatch(actions.messageAdd(
-        stubPackets.get("console.group('bar')")));
-
-      const packet = stubPackets.get("console.log(undefined)");
-      for (let i = 1; i <= logLimit + 1; i++) {
-        packet.message.arguments = [`message num ${i}`];
-        dispatch(actions.messageAdd(packet));
-      }
-
-      const messages = getAllMessages(getState());
-      expect(messages.count()).toBe(logLimit);
-      expect(messages.first().messageText).toBe(groupMessage.messageText);
-      expect(messages.get(1).parameters[0]).toBe(`message num 3`);
-      expect(messages.last().parameters[0]).toBe(`message num ${logLimit + 1}`);
     });
 
     it("adds console.dirxml call as console.log", () => {

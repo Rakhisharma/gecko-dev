@@ -128,7 +128,7 @@ function findMessage(hud, text, selector = ".message") {
  *        The selector to use in finding the message.
  */
 function findMessages(hud, text, selector = ".message") {
-  const messages = hud.ui.experimentalOutputNode.querySelectorAll(selector);
+  const messages = hud.ui.outputScroller.querySelectorAll(selector);
   const elements = Array.prototype.filter.call(
     messages,
     (el) => el.textContent.includes(text)

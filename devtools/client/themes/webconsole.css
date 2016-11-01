@@ -670,7 +670,6 @@ a.learn-more-link.webconsole-learn-more-link {
   border-right: 1px solid #D7D7D7;
 }
 
-
 /* NEW CONSOLE STYLES */
 
 #output-wrapper > div {
@@ -687,6 +686,7 @@ a.learn-more-link.webconsole-learn-more-link {
 
 .webconsole-output-wrapper {
   display: flex;
+  overflow: hidden;
   flex-direction: column;
   height: 100%;
   -moz-user-focus: normal;
@@ -698,7 +698,6 @@ a.learn-more-link.webconsole-learn-more-link {
 
 .webconsole-output {
   flex: 1;
-  overflow: auto;
 }
 
 .webconsole-filterbar-primary {

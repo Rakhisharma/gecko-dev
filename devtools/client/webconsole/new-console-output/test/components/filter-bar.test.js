@@ -80,7 +80,11 @@ describe("FilterBar component:", () => {
 
     const wrapper = mount(Provider({store}, FilterBar({ serviceContainer })));
     wrapper.find(".devtools-clear-icon").simulate("click");
-    const call = store.dispatch.getCall(0);
+
+    // Execute the thunk.
+    store.dispatch.getCall(0).args[0](store.dispatch);
+
+    const call = store.dispatch.getCall(1);
     expect(call.args[0]).toEqual({
       type: MESSAGES_CLEAR
     });

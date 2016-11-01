@@ -14,6 +14,12 @@ const { waitUntil } = require("devtools/client/performance/test/helpers/wait-uti
 const { getSelectedRecording } = require("devtools/client/performance/test/helpers/recording-utils");
 
 add_task(function* () {
+  yield SpecialPowers.pushPrefEnv({
+    "set": [
+      // Use the split console so console messages will be rendered immediately
+      ["devtools.toolbox.splitconsoleEnabled", true],
+    ]
+  });
   let { target, console } = yield initConsoleInNewTab({
     url: SIMPLE_URL,
     win: window
