@@ -34,12 +34,14 @@ ConsoleApiCall.defaultProps = {
 
 function ConsoleApiCall(props) {
   const {
+    style,
     dispatch,
     message,
     open,
     tableData,
     serviceContainer,
     indent,
+    messageBodyCache,
   } = props;
   const {
     id: messageId,
@@ -55,7 +57,9 @@ function ConsoleApiCall(props) {
   } = message;
 
   let messageBody;
-  if (type === "trace") {
+  if (messageBodyCache.hasMessageBody(messageId)) {
+    messageBody = messageBodyCache.getMessageBody(messageId);
+  } else if (type === "trace") {
     messageBody = dom.span({className: "cm-variable"}, "console.trace()");
   } else if (type === "assert") {
     let reps = formatReps(parameters);
@@ -90,6 +94,7 @@ function ConsoleApiCall(props) {
   const topLevelClasses = ["cm-s-mozilla"];
 
   return Message({
+    style,
     messageId,
     open,
     collapsible,
@@ -106,6 +111,7 @@ function ConsoleApiCall(props) {
     serviceContainer,
     dispatch,
     indent,
+    messageBodyCache,
   });
 }
 

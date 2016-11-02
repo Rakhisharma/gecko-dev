@@ -11,7 +11,6 @@ const {
   DOM: dom,
   PropTypes
 } = require("devtools/client/shared/vendor/react");
-const {openVariablesView} = require("devtools/client/webconsole/new-console-output/utils/variables-view");
 
 VariablesViewLink.displayName = "VariablesViewLink";
 
@@ -24,8 +23,8 @@ function VariablesViewLink(props) {
 
   return (
     dom.a({
-      onClick: openVariablesView.bind(null, object),
       className: "cm-variable",
+      "data-actor": object.actor,
       draggable: false,
     }, children)
   );

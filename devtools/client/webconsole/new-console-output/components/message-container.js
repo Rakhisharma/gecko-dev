@@ -10,8 +10,11 @@
 const {
   createClass,
   createFactory,
-  PropTypes
+  DOM: dom,
+  PropTypes,
 } = require("devtools/client/shared/vendor/react");
+const { findDOMNode } = require("devtools/client/shared/vendor/react-dom");
+
 
 const {
   MESSAGE_SOURCE,
@@ -34,7 +37,6 @@ const MessageContainer = createClass({
     message: PropTypes.object.isRequired,
     open: PropTypes.bool.isRequired,
     serviceContainer: PropTypes.object.isRequired,
-    autoscroll: PropTypes.bool.isRequired,
     indent: PropTypes.number.isRequired,
   },
 
@@ -45,18 +47,30 @@ const MessageContainer = createClass({
     };
   },
 
-  shouldComponentUpdate(nextProps, nextState) {
-    const repeatChanged = this.props.message.repeat !== nextProps.message.repeat;
-    const openChanged = this.props.open !== nextProps.open;
-    const tableDataChanged = this.props.tableData !== nextProps.tableData;
-    return repeatChanged || openChanged || tableDataChanged;
+  componentDidMount() {
+    // Record the initial height of the content inside the message.
+    this._cacheMessageHeight();
+  },
+
+  componentDidUpdate() {
+    // Capture height changes from toggling.
+    this._cacheMessageHeight();
+  },
+
+  _cacheMessageHeight() {
+    const innerNode = findDOMNode(this).firstChild.firstChild;
+    this.props.updateRowHeight(this.props.message.id, this.props.rowIndex, innerNode);
   },
 
   render() {
-    const { message } = this.props;
+    const { message, style } = this.props;
 
     let MessageComponent = createFactory(getMessageComponent(message));
-    return MessageComponent(this.props);
+    // The style is passed in from React Virtualized. It is a fixed height and width for
+    // the container around the message.
+    return dom.div({ style },
+      MessageComponent(this.props)
+    );
   }
 });
 

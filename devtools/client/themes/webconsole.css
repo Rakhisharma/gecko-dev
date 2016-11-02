@@ -673,12 +673,13 @@ a.learn-more-link.webconsole-learn-more-link {
 
 /* NEW CONSOLE STYLES */
 
-#output-wrapper > div {
+#output-wrapper > div:not(.webconsole-output) {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
+  overflow: auto;
 }
 
 #output-container {
@@ -698,7 +699,6 @@ a.learn-more-link.webconsole-learn-more-link {
 
 .webconsole-output {
   flex: 1;
-  overflow: auto;
 }
 
 .webconsole-filterbar-primary {

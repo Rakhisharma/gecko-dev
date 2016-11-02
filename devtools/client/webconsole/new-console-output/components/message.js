@@ -21,6 +21,7 @@ const MessageIcon = createFactory(require("devtools/client/webconsole/new-consol
 const MessageRepeat = createFactory(require("devtools/client/webconsole/new-console-output/components/message-repeat"));
 const FrameView = createFactory(require("devtools/client/shared/components/frame"));
 const StackTrace = createFactory(require("devtools/client/shared/components/stack-trace"));
+const {openVariablesView} = require("devtools/client/webconsole/new-console-output/utils/variables-view");
 
 const Message = createClass({
   displayName: "Message",
@@ -40,7 +41,6 @@ const Message = createClass({
     attachment: PropTypes.any,
     stacktrace: PropTypes.any,
     messageId: PropTypes.string,
-    scrollToMessage: PropTypes.bool,
     exceptionDocURL: PropTypes.string,
     serviceContainer: PropTypes.shape({
       emitNewMessage: PropTypes.func.isRequired,
@@ -57,13 +57,15 @@ const Message = createClass({
 
   componentDidMount() {
     if (this.messageNode) {
-      if (this.props.scrollToMessage) {
-        this.messageNode.scrollIntoView();
-      }
       // Event used in tests. Some message types don't pass it in because existing tests
       // did not emit for them.
       if (this.props.serviceContainer) {
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
+      }
+      if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache && !this.props.messageBodyCache.getMessageBody(this.props.messageId)) {
+//        const messageBody = ReactDOMServer.renderToString(dom.span({}, this.props.messageBody));
+        const messageBody = this.messageNode.querySelector(".message-body").outerHTML;
+        this.props.messageBodyCache.setMessageBody(this.props.messageId, messageBody);
       }
     }
   },
@@ -84,7 +86,6 @@ const Message = createClass({
       level,
       indent,
       topLevelClasses,
-      messageBody,
       frame,
       stacktrace,
       serviceContainer,
@@ -149,19 +150,26 @@ const Message = createClass({
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
 
-    return dom.div({
-      className: topLevelClasses.join(" "),
-      ref: node => {
-        this.messageNode = node;
-      }
-    },
+    let messageBody = this.props.messageBodyCache && this.props.messageBodyCache.getMessageBody(messageId)
+      ? dom.span({
+        dangerouslySetInnerHTML: {"__html": this.props.messageBody}
+      })
+      : this.props.messageBody;
+
+    return dom.div({ },
+      dom.div({
+        className: topLevelClasses.join(" "),
+        ref: node => {
+          this.messageNode = node;
+        }
+      },
       // @TODO add timestamp
       MessageIndent({indent}),
       icon,
       collapse,
       dom.span({ className: "message-body-wrapper" },
         dom.span({ className: "message-flex-body" },
-          dom.span({ className: "message-body devtools-monospace" },
+          dom.span({ onClick: handleMessageClick, className: "message-body devtools-monospace" },
             messageBody,
             learnMore
           ),
@@ -170,8 +178,12 @@ const Message = createClass({
         ),
         attachment
       )
-    );
+    ));
   }
 });
+
+function handleMessageClick(e) {
+  openVariablesView(e.nativeEvent.explicitOriginalTarget.parentNode.dataset.actor);
+}
 
 module.exports = Message;

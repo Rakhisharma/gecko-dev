@@ -30,9 +30,10 @@ function PageError(props) {
   const {
     dispatch,
     message,
+    indent,
     open,
     serviceContainer,
-    indent,
+    style,
   } = props;
   const {
     id: messageId,
@@ -47,6 +48,7 @@ function PageError(props) {
   } = message;
 
   const childProps = {
+    style,
     dispatch,
     messageId,
     open,

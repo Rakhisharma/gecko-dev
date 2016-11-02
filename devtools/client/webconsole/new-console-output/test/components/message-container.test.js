@@ -48,7 +48,7 @@ describe("MessageContainer component:", () => {
         message,
         serviceContainer,
       });
-      expect(rendered.type).toBe(component);
+      expect(rendered.props.children.type).toBe(component);
     });
   });
 });

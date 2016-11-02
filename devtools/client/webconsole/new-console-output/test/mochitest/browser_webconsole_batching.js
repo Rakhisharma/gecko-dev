@@ -9,51 +9,33 @@
 
 const TEST_URI = "http://example.com/browser/devtools/client/webconsole/new-console-output/test/mochitest/test-batching.html";
 const { l10n } = require("devtools/client/webconsole/new-console-output/utils/messages");
+const { getAllMessages } = require("devtools/client/webconsole/new-console-output/selectors/messages");
 
 add_task(function* () {
   let hud = yield openNewTabAndConsole(TEST_URI);
 
-  const store = hud.ui.newConsoleOutput.getStore();
-  // Adding loggin each time the store is modified in order to check
-  // the store state in case of failure.
-  store.subscribe(() => {
-    const messages = store.getState().messages.messagesById.toJS()
-      .map(message => {
-        return {
-          id: message.id,
-          type: message.type,
-          parameters: message.parameters,
-          messageText: message.messageText
-        };
-      }
-    );
-    info("messages : " + JSON.stringify(messages));
-  });
-
-  const messageNumber = 100;
-  yield testSimpleBatchLogging(hud, messageNumber);
-  yield testBatchLoggingAndClear(hud, messageNumber);
+  yield testBatchMessageOrder(hud);
+  yield testBatchLoggingAndClear(hud);
 });
 
-function* testSimpleBatchLogging(hud, messageNumber) {
-  yield ContentTask.spawn(gBrowser.selectedBrowser, messageNumber,
-    function (numMessages) {
-      content.wrappedJSObject.batchLog(numMessages);
+function* testBatchMessageOrder(hud) {
+  yield ContentTask.spawn(gBrowser.selectedBrowser, {}, () => {
+    for (let i = 0; i < 10000; i++) {
+      content.console.log(i);
     }
-  );
+  });
+  yield waitFor(() => findMessage(hud, "9999"));
 
-  for (let i = 0; i < messageNumber; i++) {
-    let node = yield waitFor(() => findMessageAtIndex(hud, i, i));
-    is(node.textContent, i.toString(), `message at index "${i}" is the expected one`);
-  }
+  const store = hud.ui.newConsoleOutput.getStore();
+  const messages = getAllMessages(store.getState());
+  const values = messages.toArray().map(message => message.parameters[0]);
+  ok(values.every((value, index) => value === index), "messages are in expected order");
 }
 
-function* testBatchLoggingAndClear(hud, messageNumber) {
-  yield ContentTask.spawn(gBrowser.selectedBrowser, messageNumber,
-    function (numMessages) {
-      content.wrappedJSObject.batchLogAndClear(numMessages);
-    }
-  );
+function* testBatchLoggingAndClear(hud) {
+  yield ContentTask.spawn(gBrowser.selectedBrowser, {}, () => {
+    content.wrappedJSObject.batchLogAndClear(100);
+  });
   yield waitFor(() => findMessage(hud, l10n.getStr("consoleCleared")));
   ok(true, "console cleared message is displayed");
 
@@ -61,9 +43,4 @@ function* testBatchLoggingAndClear(hud, messageNumber) {
   // whatever their content is.
   const messages = findMessages(hud, "");
   is(messages.length, 1, "console was cleared as expected");
-}
-
-function findMessageAtIndex(hud, text, index) {
-  const selector = `.message:nth-of-type(${index + 1}) .message-body`;
-  return findMessage(hud, text, selector);
 }

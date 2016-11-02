@@ -23,6 +23,10 @@ module.exports = class MessageBodyCache {
     return this.hasMessageBody(id) ? this._cachedMessageBodies[id] : null;
   }
 
+  setMessageBody(id, messageBody) {
+    this._cachedMessageBodies[id] = messageBody;
+  }
+
   hasMessageBody(id) {
     return !!this._cachedMessageBodies[id];
   }

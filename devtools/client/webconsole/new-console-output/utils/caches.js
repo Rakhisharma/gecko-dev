@@ -6,10 +6,16 @@
 
 "use strict";
 
-const CellSizeCache = require("devtools/client/webconsole/new-console-output/utils/cell-size-cache");
-const MessageBodyCache = require("devtools/client/webconsole/new-console-output/utils/message-body-cache");
+const cellSizeCache = new (require("devtools/client/webconsole/new-console-output/utils/cell-size-cache"))();
+const messageBodyCache = new (require("devtools/client/webconsole/new-console-output/utils/message-body-cache"))();
+
+function clearCaches() {
+  messageBodyCache.clearAllMessageBodies();
+  cellSizeCache.clearAllRowHeights();
+}
 
 module.exports = {
-  cellSizeCache: new CellSizeCache(),
-  messageBodyCache: new MessageBodyCache(),
+  cellSizeCache,
+  messageBodyCache,
+  clearCaches,
 };
