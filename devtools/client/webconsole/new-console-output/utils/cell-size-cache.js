@@ -10,17 +10,20 @@ module.exports = class CellSizeCache {
   constructor() {
     this._cachedRowHeights = {};
     this._indexToIdMap = {};
+    this._isDirty = false;
   }
 
   clearAllRowHeights() {
     this._cachedRowHeights = {};
     this._indexToIdMap = {};
+    this._isDirty = true;
   }
 
   clearRowHeight(index) {
     const id = this.getIdFromIndex(index);
     delete this._cachedRowHeights[id];
     delete this._indexToIdMap[index];
+    this._isDirty = true;
   }
 
   getRowHeight(index) {
@@ -44,6 +47,7 @@ module.exports = class CellSizeCache {
   setRowHeight(id, index, height) {
     this._indexToIdMap[index] = id;
     this._cachedRowHeights[id] = height;
+    this._isDirty = true;
   }
 
   getIdFromIndex(index) {
@@ -52,5 +56,13 @@ module.exports = class CellSizeCache {
 
   getIndexFromId(id) {
     return this._indexToIdMap.indexOf(id);
+  }
+
+  isDirty() {
+    return this._isDirty;
+  }
+
+  clearIsDirty() {
+    this._isDirty = false;
   }
 };

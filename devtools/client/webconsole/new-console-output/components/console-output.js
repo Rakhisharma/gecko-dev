@@ -31,6 +31,9 @@ const MessageContainer = createFactory(require("devtools/client/webconsole/new-c
 
 const { cellSizeCache, messageBodyCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
 
+/**
+ * The container for the list of messages.
+ */
 const ConsoleOutput = createClass({
 
   displayName: "ConsoleOutput",
@@ -42,12 +45,13 @@ const ConsoleOutput = createClass({
       attachRefToHud: PropTypes.func.isRequired,
       autocompletePopupIsOpen: PropTypes.func.isRequired,
     }),
-    autoscrollToRow: PropTypes.number,
   },
 
-  componentDidMount() {
-    this._largestRowIndex = 0;
+  componentWillMount() {
+    // Scroll state is handled outside of controlled props/state for performance reasons.
+    this._scrollState = getInitialScrollState();
 
+    // Set handler for keyboard accessibility.
     this.shortcuts = new KeyShortcuts({ window });
     [
       "Home",
@@ -55,41 +59,60 @@ const ConsoleOutput = createClass({
       "PageDown",
       "PageUp"
     ].forEach((key) => this.shortcuts.on(key, this._onShortcut));
+  },
 
-    // Used in mochitests.
+  componentDidMount() {
+    // For mochitests.
     this.props.serviceContainer.attachRefToHud("outputScroller", findDOMNode(this.grid));
   },
 
   componentWillReceiveProps(nextProps) {
+    // If the old list of messages is not a subset of the new list of messages, any stored
+    // scroll state would be invalid, so reset.
+    if (!this.props.messages.isSubset(nextProps.messages)) {
+      this._scrollState = getInitialScrollState();
+    }
+
+    // Store the messages on state so that PageDown can access them in the shortcut
+    // handler.
+    // @TODO determine if this is really necessary.
     this.setState({
       messages: nextProps.messages,
     });
   },
 
   componentWillUpdate(nextProps, nextState) {
-    if (this.scrollToRow !== false) {
+    // If a scrollToRow value is set at this point, it means that the user is scrolling
+    // with the keyboard. Do not auto/force scroll.
+    if (this._scrollState.scrollToRow !== false) {
       return;
     }
 
     // Figure out if the messages should be autoscrolled.
     if (this.props.messages.size == 0
-      || !this.stopScrolling
-      || nextProps.lastForceScrollMessageIndex > this.props.messages.size
+      || this._scrollState.autoscrollOn
+      // Certain kinds of messages force a scroll. If one of those has come in since we
+      // last rendered, force scroll to the bottom.
+      || nextProps.lastForceScrollMessageIndex > this.props.messages.size - 1
     ) {
-      this.scrollToRow = nextProps.messages.size - 1;
+      this._scrollState.scrollToRow = nextProps.messages.size - 1;
     }
   },
 
   componentDidUpdate() {
-    if (this.changedHeights) {
-      this.changedHeights = false;
+    // If changes have been made to the cached row heights, recompute the grid size
+    // (which forces a rerender).
+    if (cellSizeCache.isDirty()) {
+      cellSizeCache.clearIsDirty();
       this.grid.recomputeGridSize();
+      // Unfortunately calling this "private" method is required to position the scroll
+      // top after cell heights have been changed.
       this.grid._updateScrollTopForScrollToRow();
     }
 
     // Clear out props/state used for imperative scrolling.
-    this.scrollToRow = false;
-    this._scrollToAlignment = null;
+    this._scrollState.scrollToRow = false;
+    this._scrollState.scrollToAlignment = null;
   },
 
   _onShortcut(name, event) {
@@ -101,49 +124,64 @@ const ConsoleOutput = createClass({
 
     switch (name) {
       case "PageDown":
-        this.scrollToRow = this.rowStopIndex;
-        this._scrollToAlignment = "start";
+        this._scrollState.scrollToRow = this._scrollState.rowStopIndex;
+        this._scrollState.scrollToAlignment = "start";
         break;
       case "PageUp":
-        this.scrollToRow = this.rowStartIndex;
-        this._scrollToAlignment = "end";
+        this._scrollState.scrollToRow = this._scrollState.rowStartIndex;
+        this._scrollState.scrollToAlignment = "end";
         break;
       case "Home":
-        this.scrollToRow = 0;
-        this._scrollToAlignment = "start";
+        this._scrollState.scrollToRow = 0;
+        this._scrollState.scrollToAlignment = "start";
         break;
       case "End":
         this.scrollToRow = this.state.messages.size - 1;
-        this._scrollToAlignment = "end";
+        this._scrollState.scrollToAlignment = "end";
         break;
     }
 
     this.forceUpdate();
   },
 
-  _onResize() {
-    cellSizeCache.clearAllRowHeights();
-    this.changedHeights = true;
+  _onResize({width}) {
+    // If the container width has changed, the heights of cells may have changed. Clear
+    // the cache so they can be recalculated.
+    if (this._scrollState.resizedWidth !== width) {
+      this._scrollState.resizedWidth = width;
+      cellSizeCache.clearAllRowHeights();
+    }
     this.forceUpdate();
   },
 
   _onSectionRendered({ rowStartIndex, rowStopIndex }) {
-    this.stopScrolling = false;
+    // Default to autoscroll being truend on.
+    this._scrollState.autoscrollOn = true;
 
-    this.rowStartIndex = rowStartIndex;
-    this.rowStopIndex = rowStopIndex;
-    if (rowStopIndex > this._largestRowIndex) {
-      this._largestRowIndex = rowStopIndex;
-    } else if (rowStopIndex < this._largestRowIndex) {
-      this.stopScrolling = true;
+    // Check whether autoscroll should be turned off. If the last message in the block
+    // that we've just rendered isn't the last message in the messages list, then the
+    // user has scrolled up. Turn off autoscrolling.
+    // @TODO improve this logic. It breaks in the "lots of logs" case.
+    if (rowStopIndex < this._scrollState.largestRowIndex) {
+      this._scrollState.autoscrollOn = false;
+    } else {
+      this._scrollState.largestRowIndex = rowStopIndex;
     }
+
+    // Store these values for use with PageUp / PageDown.
+    this._scrollState.rowStartIndex = rowStartIndex;
+    this._scrollState.rowStopIndex = rowStopIndex;
   },
 
   _updateRowHeight(id, index, node) {
+    // If this row's height hasn't been cached, or its height has changed, update it in
+    // the cache. Since this is called after the render cycle is complete (from the
+    // message's componentDidMount or componentDidUpdate), we then have to force an update
+    // to ensure the message's container is rerendered. When it is, the rowHeightGetter
+    // will pull the new height from the cache.
     if (!cellSizeCache.hasRowHeightById(id)
       || cellSizeCache.getRowHeightById(id) !== node.scrollHeight) {
       cellSizeCache.setRowHeight(id, index, node.scrollHeight);
-      this.changedHeights = true;
       this.forceUpdate();
     }
   },
@@ -204,10 +242,10 @@ const ConsoleOutput = createClass({
             this.grid = ref;
           },
           onSectionRendered: this._onSectionRendered,
-          scrollToAlignment: this._scrollToAlignment || "auto"
+          scrollToAlignment: this._scrollState.scrollToAlignment || "auto"
         };
-        if (this.scrollToRow !== false) {
-          gridProps.scrollToRow = this.scrollToRow;
+        if (this._scrollState.scrollToRow !== false) {
+          gridProps.scrollToRow = this._scrollState.scrollToRow;
         }
         return createElement(Grid, gridProps);
       }
@@ -227,6 +265,18 @@ const ConsoleOutput = createClass({
     );
   }
 });
+
+function getInitialScrollState() {
+  return {
+    largestRowIndex: 0,
+    rowStartIndex: 0,
+    rowStopIndex: 0,
+    autoscrollOn: true,
+    scrollToRow: 0,
+    scrollToAlignment: "auto",
+    resizedWidth: null,
+  };
+}
 
 function mapStateToProps(state, props) {
   return {
