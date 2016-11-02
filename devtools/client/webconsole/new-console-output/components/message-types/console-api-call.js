@@ -58,7 +58,9 @@ function ConsoleApiCall(props) {
 
   let messageBody;
   if (messageBodyCache.hasMessageBody(messageId)) {
-    messageBody = messageBodyCache.getMessageBody(messageId);
+    messageBody = dom.span({
+      dangerouslySetInnerHTML: {"__html": messageBodyCache.getMessageBody(messageId)}
+    });
   } else if (type === "trace") {
     messageBody = dom.span({className: "cm-variable"}, "console.trace()");
   } else if (type === "assert") {

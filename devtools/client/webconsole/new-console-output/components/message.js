@@ -63,8 +63,7 @@ const Message = createClass({
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
       }
       if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache && !this.props.messageBodyCache.getMessageBody(this.props.messageId)) {
-//        const messageBody = ReactDOMServer.renderToString(dom.span({}, this.props.messageBody));
-        const messageBody = this.messageNode.querySelector(".message-body").outerHTML;
+        const messageBody = this.messageNode.querySelector(".message-body").firstChild.innerHTML;
         this.props.messageBodyCache.setMessageBody(this.props.messageId, messageBody);
       }
     }
@@ -86,6 +85,7 @@ const Message = createClass({
       level,
       indent,
       topLevelClasses,
+      messageBody,
       frame,
       stacktrace,
       serviceContainer,
@@ -150,12 +150,6 @@ const Message = createClass({
       }, `[${l10n.getStr("webConsoleMoreInfoLabel")}]`);
     }
 
-    let messageBody = this.props.messageBodyCache && this.props.messageBodyCache.getMessageBody(messageId)
-      ? dom.span({
-        dangerouslySetInnerHTML: {"__html": this.props.messageBody}
-      })
-      : this.props.messageBody;
-
     return dom.div({ },
       dom.div({
         className: topLevelClasses.join(" "),
@@ -170,7 +164,9 @@ const Message = createClass({
       dom.span({ className: "message-body-wrapper" },
         dom.span({ className: "message-flex-body" },
           dom.span({ onClick: handleMessageClick, className: "message-body devtools-monospace" },
-            messageBody,
+            // This wrapping span makes it easy to select the message body contents for
+            // caching, and also matches the span required for dangerouslySetInnerHTML.
+            dom.span({}, messageBody),
             learnMore
           ),
           repeat,
