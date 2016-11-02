@@ -195,13 +195,11 @@ const ConsoleOutput = createClass({
           columnCount: 1,
           columnWidth: width,
           height,
-          overscanColumnCount: 0,
           overscanRowCount: 5,
           cellRenderer: this._rowRenderer,
           rowCount: messages.size,
           rowHeight: this.getRowHeight,
           width,
-          onScroll: () => {},
           ref: ref => {
             this.grid = ref;
           },
@@ -237,7 +235,6 @@ function mapStateToProps(state, props) {
     messagesTableData: getAllMessagesTableDataById(state),
     lastForceScrollMessageIndex: getLastForceScrollMessageIndex(state),
     groups: getAllGroupsById(state),
-    test: Math.random()
   };
 }
 
