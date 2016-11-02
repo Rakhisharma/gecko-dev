@@ -688,6 +688,7 @@ a.learn-more-link.webconsole-learn-more-link {
 
 .webconsole-output-wrapper {
   display: flex;
+  overflow: hidden;
   flex-direction: column;
   height: 100%;
   -moz-user-focus: normal;
