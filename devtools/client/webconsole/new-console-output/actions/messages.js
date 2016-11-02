@@ -34,8 +34,14 @@ function messageAdd(packet, idGenerator = null) {
   };
 
   if (message.type === MESSAGE_TYPE.CLEAR) {
+    clearCaches();
+
     return batchActions([
-      messagesClear(),
+      // @TODO make batchActions support thunks so we can use messagesClear() instead.
+      // See https://github.com/abc123s/redux-batch-enhancer
+      {
+        type: MESSAGES_CLEAR
+      },
       addMessageAction,
     ]);
   }
