@@ -186,7 +186,7 @@ const ConsoleOutput = createClass({
     }
   },
 
-  _rowRenderer({ rowIndex, style }) {
+  _renderRow({ rowIndex, style }) {
     let {
       dispatch,
       messages,
@@ -222,7 +222,7 @@ const ConsoleOutput = createClass({
     return cellSizeCache.getRowHeight(index);
   },
 
-  _prepareChildren() {
+  _renderGrid() {
     const { messages } = this.props;
     return createElement(AutoSizer,
       {
@@ -234,7 +234,7 @@ const ConsoleOutput = createClass({
           columnWidth: width,
           height,
           overscanRowCount: 5,
-          cellRenderer: this._rowRenderer,
+          cellRenderer: this._renderRow,
           rowCount: messages.size,
           rowHeight: this.getRowHeight,
           width,
@@ -256,11 +256,8 @@ const ConsoleOutput = createClass({
     return (
       dom.div({
         className: "webconsole-output",
-        ref: ref => {
-          this.outputNode = ref;
-        }
       },
-      this._prepareChildren()
+      this._renderGrid()
       )
     );
   }
