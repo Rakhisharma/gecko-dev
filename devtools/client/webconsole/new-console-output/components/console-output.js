@@ -241,10 +241,11 @@ const ConsoleOutput = createClass({
           onScroll: this._onScroll,
           scrollToAlignment: this._scrollState.scrollToAlignment || "auto",
           // Grid has a shouldComponentUpdate which does a shallow compare. We want to
-          // update whenever there is a change in the message UI state. Even though the
-          // grid doesn't use the UI state, we pass it in to trigger a rerender if it has
-          // changed.
+          // update whenever there is a change in the message UI state, or when table data
+          // comes in. Even though the grid doesn't use these props, we pass them in to
+          // trigger a rerender if they have changed.
           uiUpdate: this.props.messagesUi,
+          tableUpdate: this.props.messagesTableData,
         };
         if (this._scrollState.scrollToRow !== false) {
           gridProps.scrollToRow = this._scrollState.scrollToRow;
