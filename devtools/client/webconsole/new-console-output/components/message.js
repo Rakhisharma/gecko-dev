@@ -22,6 +22,7 @@ const MessageRepeat = createFactory(require("devtools/client/webconsole/new-cons
 const FrameView = createFactory(require("devtools/client/shared/components/frame"));
 const StackTrace = createFactory(require("devtools/client/shared/components/stack-trace"));
 const {openVariablesView} = require("devtools/client/webconsole/new-console-output/utils/variables-view");
+const { messageBodyCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
 
 const Message = createClass({
   displayName: "Message",
@@ -36,6 +37,7 @@ const Message = createClass({
     indent: PropTypes.number.isRequired,
     topLevelClasses: PropTypes.array.isRequired,
     messageBody: PropTypes.any.isRequired,
+    cacheMessageBody: PropTypes.bool,
     repeat: PropTypes.any,
     frame: PropTypes.any,
     attachment: PropTypes.any,
@@ -57,14 +59,23 @@ const Message = createClass({
 
   componentDidMount() {
     if (this.messageNode) {
+      // When lots of Reps are output in the same message, it can make scrolling janky.
+      // With virtualization, we mount the node each time it comes into view, and mounting
+      // lots of Reps is slow. To make it faster, cache message bodies as HTML strings and
+      // reuse that when scrolling. Note, this does cause issues for click handlers inside
+      // of Reps. See handleMessageClick below.
+      if (this.props.cacheMessageBody
+        && !messageBodyCache.getMessageBody(this.props.messageId)) {
+        const messageBody = this.messageNode.querySelector(".message-body").firstChild.innerHTML;
+        messageBodyCache.setMessageBody(this.props.messageId, messageBody);
+      }
+
       // Event used in tests. Some message types don't pass it in because existing tests
-      // did not emit for them.
+      // did not emit for them. Note, this is not guarenteed to emit even after a message
+      // is recorded, due to virtualization. It also may emit more than once for the same
+      // message if the message is scrolled into view more than once.
       if (this.props.serviceContainer) {
         this.props.serviceContainer.emitNewMessage(this.messageNode, this.props.messageId);
-      }
-      if (typeof this.props.messageBody !== "string" && this.props.messageBodyCache && !this.props.messageBodyCache.getMessageBody(this.props.messageId)) {
-        const messageBody = this.messageNode.querySelector(".message-body").firstChild.innerHTML;
-        this.props.messageBodyCache.setMessageBody(this.props.messageId, messageBody);
       }
     }
   },

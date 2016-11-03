@@ -29,7 +29,7 @@ const {
 } = require("devtools/client/webconsole/new-console-output/selectors/messages");
 const MessageContainer = createFactory(require("devtools/client/webconsole/new-console-output/components/message-container").MessageContainer);
 
-const { cellSizeCache, messageBodyCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
+const { cellSizeCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
 
 /**
  * The container for the list of messages.
@@ -222,7 +222,6 @@ const ConsoleOutput = createClass({
       style,
       updateRowHeight: this._updateRowHeight,
       rowIndex,
-      messageBodyCache,
     });
   },
 

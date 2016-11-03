@@ -18,6 +18,8 @@ const {isGroupType, l10n} = require("devtools/client/webconsole/new-console-outp
 
 const Message = createFactory(require("devtools/client/webconsole/new-console-output/components/message"));
 
+const { messageBodyCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
+
 ConsoleApiCall.displayName = "ConsoleApiCall";
 
 ConsoleApiCall.propTypes = {
@@ -41,7 +43,6 @@ function ConsoleApiCall(props) {
     tableData,
     serviceContainer,
     indent,
-    messageBodyCache,
   } = props;
   const {
     id: messageId,
@@ -106,6 +107,7 @@ function ConsoleApiCall(props) {
     level,
     topLevelClasses,
     messageBody,
+    cacheMessageBody: true,
     repeat,
     frame,
     stacktrace,
@@ -113,7 +115,6 @@ function ConsoleApiCall(props) {
     serviceContainer,
     dispatch,
     indent,
-    messageBodyCache,
   });
 }
 
