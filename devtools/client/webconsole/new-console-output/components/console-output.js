@@ -74,6 +74,7 @@ const ConsoleOutput = createClass({
   },
 
   componentWillReceiveProps(nextProps) {
+    console.log(nextProps.messages.toJS())
     // If the old list of messages is not a subset of the new list of messages, any stored
     // scroll state would be invalid, so reset.
     if (isSubset(this.props.messages, nextProps.messages)) {
@@ -225,10 +226,6 @@ const ConsoleOutput = createClass({
     });
   },
 
-  getRowHeight({ index }) {
-    return cellSizeCache.getRowHeight(index);
-  },
-
   _renderGrid() {
     const { messages } = this.props;
     return createElement(AutoSizer,
@@ -243,7 +240,7 @@ const ConsoleOutput = createClass({
           overscanRowCount: 5,
           cellRenderer: this._renderRow,
           rowCount: messages.size,
-          rowHeight: this.getRowHeight,
+          rowHeight: getRowHeight,
           width,
           ref: ref => {
             this.grid = ref;
@@ -289,9 +286,14 @@ function isSubset(prevList, nextList) {
     !prevList
     || prevList.size == 0
     || nextList.size == 0
+    || nextList.size < prevList.size
     || prevList.get(0).id !== nextList.get(0).id
     || prevList.get(prevList.size - 1).id !== nextList.get(prevList.size - 1).id
   );
+}
+
+function getRowHeight({ index }) {
+  return cellSizeCache.getRowHeight(index);
 }
 
 function mapStateToProps(state, props) {
