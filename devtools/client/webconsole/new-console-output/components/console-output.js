@@ -33,6 +33,11 @@ const { cellSizeCache, messageBodyCache } = require("devtools/client/webconsole/
 
 /**
  * The container for the list of messages.
+ *
+ * This component is extremely stateful, managing its state outside of React's controled
+ * props/state system. This is for performance reasons. If similar performance can be
+ * achieved for tasks like bulk logging and scrolling with a less stateful approach, that
+ * would be preferable.
  */
 const ConsoleOutput = createClass({
 
@@ -69,7 +74,7 @@ const ConsoleOutput = createClass({
   componentWillReceiveProps(nextProps) {
     // If the old list of messages is not a subset of the new list of messages, any stored
     // scroll state would be invalid, so reset.
-    if (!this.props.messages.isSubset(nextProps.messages)) {
+    if (isSubset(this.props.messages, nextProps.messages)) {
       this._scrollState = getInitialScrollState();
     }
 
@@ -273,6 +278,18 @@ function getInitialScrollState() {
     scrollToAlignment: "auto",
     resizedWidth: null,
   };
+}
+
+function isSubset(prevList, nextList) {
+  // Running List.isSubset() on large lists is a huge performance hit. Instead, we use a
+  // heuristic to determine if the previous list is a subset of the next.
+  return !(
+    !prevList
+    || prevList.size == 0
+    || nextList.size == 0
+    || prevList.get(0).id !== nextList.get(0).id
+    || prevList.get(prevList.size - 1).id !== nextList.get(prevList.size - 1).id
+  );
 }
 
 function mapStateToProps(state, props) {
