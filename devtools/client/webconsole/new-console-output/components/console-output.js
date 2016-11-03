@@ -74,10 +74,9 @@ const ConsoleOutput = createClass({
   },
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.messages.toJS())
     // If the old list of messages is not a subset of the new list of messages, any stored
     // scroll state would be invalid, so reset.
-    if (isSubset(this.props.messages, nextProps.messages)) {
+    if (!isSubset(this.props.messages, nextProps.messages)) {
       this._scrollState = getInitialScrollState();
     }
 
@@ -98,7 +97,8 @@ const ConsoleOutput = createClass({
 
     // Figure out if the messages should be autoscrolled.
     if (this.props.messages.size == 0
-      || this._scrollState.autoscrollOn
+      || shouldAutoscroll(this._scrollState.scrollTop,
+          this._scrollState.clientHeight, this._scrollState.scrollHeight)
       // Certain kinds of messages force a scroll. If one of those has come in since we
       // last rendered, force scroll to the bottom.
       || nextProps.lastForceScrollMessageIndex > this.props.messages.size - 1
@@ -163,22 +163,15 @@ const ConsoleOutput = createClass({
   },
 
   _onSectionRendered({ rowStartIndex, rowStopIndex }) {
-    // Default to autoscroll being truend on.
-    this._scrollState.autoscrollOn = true;
-
-    // Check whether autoscroll should be turned off. If the last message in the block
-    // that we've just rendered isn't the last message in the messages list, then the
-    // user has scrolled up. Turn off autoscrolling.
-    // @TODO improve this logic. It breaks in the "lots of logs" case.
-    if (rowStopIndex < this._scrollState.largestRowIndex) {
-      this._scrollState.autoscrollOn = false;
-    } else {
-      this._scrollState.largestRowIndex = rowStopIndex;
-    }
-
     // Store these values for use with PageUp / PageDown.
     this._scrollState.rowStartIndex = rowStartIndex;
     this._scrollState.rowStopIndex = rowStopIndex;
+  },
+
+  _onScroll({ clientHeight, scrollHeight, scrollTop}) {
+    this._scrollState.clientHeight = clientHeight;
+    this._scrollState.scrollTop = scrollTop;
+    this._scrollState.scrollHeight = scrollHeight;
   },
 
   _updateRowHeight(id, index, node) {
@@ -245,7 +238,13 @@ const ConsoleOutput = createClass({
             this.grid = ref;
           },
           onSectionRendered: this._onSectionRendered,
-          scrollToAlignment: this._scrollState.scrollToAlignment || "auto"
+          onScroll: this._onScroll,
+          scrollToAlignment: this._scrollState.scrollToAlignment || "auto",
+          // Grid has a shouldComponentUpdate which does a shallow compare. We want to
+          // update whenever there is a change in the message UI state. Even though the
+          // grid doesn't use the UI state, we pass it in to trigger a rerender if it has
+          // changed.
+          uiUpdate: this.props.messagesUi,
         };
         if (this._scrollState.scrollToRow !== false) {
           gridProps.scrollToRow = this._scrollState.scrollToRow;
@@ -268,11 +267,9 @@ const ConsoleOutput = createClass({
 
 function getInitialScrollState() {
   return {
-    largestRowIndex: 0,
     rowStartIndex: 0,
     rowStopIndex: 0,
-    autoscrollOn: true,
-    scrollToRow: 0,
+    scrollToRow: false,
     scrollToAlignment: "auto",
     resizedWidth: null,
   };
@@ -289,6 +286,12 @@ function isSubset(prevList, nextList) {
     || prevList.get(0).id !== nextList.get(0).id
     || prevList.get(prevList.size - 1).id !== nextList.get(prevList.size - 1).id
   );
+}
+
+function shouldAutoscroll(scrollTop, clientHeight, scrollHeight) {
+  return !scrollHeight
+    || scrollHeight < clientHeight
+    || Math.abs(scrollTop + clientHeight - scrollHeight) < 20;
 }
 
 function getRowHeight({ index }) {
