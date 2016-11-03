@@ -26,6 +26,12 @@ const serviceContainer = require("devtools/client/webconsole/new-console-output/
 
 const tempfilePath = "http://example.com/browser/devtools/client/webconsole/new-console-output/test/fixtures/stub-generators/test-tempfile.js";
 
+const { clearCaches } = require("devtools/client/webconsole/new-console-output/utils/caches");
+
+beforeEach(() => {
+  clearCaches();
+});
+
 describe("ConsoleAPICall component:", () => {
   describe("console.log", () => {
     it("renders string grips", () => {

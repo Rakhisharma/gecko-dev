@@ -190,6 +190,9 @@ const Message = createClass({
 });
 
 function handleMessageClick(e) {
+  if (!e.nativeEvent.explicitOriginalTarget) {
+    return;
+  }
   let clickedNode = e.nativeEvent.explicitOriginalTarget.parentNode;
   if (clickedNode.dataset.actor) {
     openVariablesView(clickedNode.dataset.actor);

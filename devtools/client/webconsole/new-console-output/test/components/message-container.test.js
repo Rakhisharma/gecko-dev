@@ -18,11 +18,17 @@ const PageError = require("devtools/client/webconsole/new-console-output/compone
 // Test fakes.
 const { stubPreparedMessages } = require("devtools/client/webconsole/new-console-output/test/fixtures/stubs/index");
 const serviceContainer = require("devtools/client/webconsole/new-console-output/test/fixtures/serviceContainer");
+const updateRowHeight = () => {};
 
 describe("MessageContainer component:", () => {
   it("pipes data to children as expected", () => {
     const message = stubPreparedMessages.get("console.log('foobar', 'test')");
-    const rendered = renderComponent(MessageContainer, {message, serviceContainer});
+    const props = {
+      message,
+      serviceContainer,
+      updateRowHeight
+    };
+    const rendered = renderComponent(MessageContainer, props);
 
     expect(rendered.textContent.includes("foobar")).toBe(true);
   });
