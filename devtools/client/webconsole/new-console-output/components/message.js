@@ -179,7 +179,10 @@ const Message = createClass({
 });
 
 function handleMessageClick(e) {
-  openVariablesView(e.nativeEvent.explicitOriginalTarget.parentNode.dataset.actor);
+  let clickedNode = e.nativeEvent.explicitOriginalTarget.parentNode;
+  if (clickedNode.dataset.actor) {
+    openVariablesView(clickedNode.dataset.actor);
+  }
 }
 
 module.exports = Message;
