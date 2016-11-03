@@ -64,6 +64,8 @@ const ConsoleOutput = createClass({
       "PageDown",
       "PageUp"
     ].forEach((key) => this.shortcuts.on(key, this._onShortcut));
+
+    this._scrollState.scrollToRow = this.props.messages.size;
   },
 
   componentDidMount() {
