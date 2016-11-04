@@ -27,19 +27,23 @@ add_task(function* () {
 
   // Page up.
   EventUtils.synthesizeKey("VK_PAGE_UP", {});
-  ok(!findMessage(hud, "console message 99"), "scroll position changed after page up");
+  yield waitFor(() => !findMessage(hud, "console message 99"));
+  ok(true, "scroll position changed after page up");
 
   // Page down.
   EventUtils.synthesizeKey("VK_PAGE_DOWN", {});
-  ok(findMessage(hud, "console message 99"), "scroll position changed after page down");
+  yield waitFor(() => findMessage(hud, "console message 99"));
+  ok(true, "scroll position changed after page down");
 
   // Home
   EventUtils.synthesizeKey("VK_HOME", {});
-  ok(findMessage(hud, "console message 1"), "scroll position at top after home");
+  yield waitFor(() => findMessage(hud, "console message 1"));
+  ok(true, "scroll position at top after home");
 
   // End
   EventUtils.synthesizeKey("VK_END", {});
-  ok(findMessage(hud, "console message 99"), "scroll position at bottom after end");
+  yield waitFor(() => findMessage(hud, "console message 99"));
+  ok(true, "scroll position at bottom after end");
 
   // Clear output
   info("try ctrl-l to clear output");
