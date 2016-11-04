@@ -15,6 +15,12 @@ const { waitForRecordingStartedEvents } = require("devtools/client/performance/t
 const { idleWait } = require("devtools/client/performance/test/helpers/wait-utils");
 
 add_task(function* () {
+  yield SpecialPowers.pushPrefEnv({
+    "set": [
+      // Use the split console so console messages will be rendered immediately
+      ["devtools.toolbox.splitconsoleEnabled", true],
+    ]
+  });
   let { target, console } = yield initConsoleInNewTab({
     url: SIMPLE_URL,
     win: window

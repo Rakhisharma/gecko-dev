@@ -25,6 +25,12 @@ add_task(function* () {
   // Keep the profiler's buffer large, but still get to 1% relatively quick.
   Services.prefs.setIntPref(PROFILER_BUFFER_SIZE_PREF, 1000000);
 
+  yield SpecialPowers.pushPrefEnv({
+    "set": [
+      // Use the split console so console messages will be rendered immediately
+      ["devtools.toolbox.splitconsoleEnabled", true],
+    ]
+  });
   let { target, console } = yield initConsoleInNewTab({
     url: SIMPLE_URL,
     win: window
