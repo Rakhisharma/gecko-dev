@@ -670,16 +670,14 @@ a.learn-more-link.webconsole-learn-more-link {
   border-right: 1px solid #D7D7D7;
 }
 
-
 /* NEW CONSOLE STYLES */
 
-#output-wrapper > div:not(.webconsole-output) {
+#output-wrapper > div {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  overflow: auto;
 }
 
 #output-container {
