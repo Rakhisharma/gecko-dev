@@ -61,13 +61,18 @@ const ConsoleOutput = createClass({
 
   _updateRowHeight(id, index, node) {
     // If this row's height hasn't been cached, or its height has changed, update it in
-    // the cache. Since this is called after the render cycle is complete (from the
-    // message's componentDidMount or componentDidUpdate), we then have to force an update
-    // to ensure the message's container is rerendered. When it is, the rowHeightGetter
-    // will pull the new height from the cache.
+    // the cache.
     if (!cellSizeCache.hasRowHeightById(id)
       || cellSizeCache.getRowHeightById(id) !== node.scrollHeight) {
       cellSizeCache.setRowHeight(id, index, node.scrollHeight);
+      // If this is the widest row, update the cache.
+      if (cellSizeCache.getWidestRowDimension() < node.scrollWidth) {
+        cellSizeCache.setWidestRowDimension(node.scrollWidth);
+      }
+      // Since this is called after the render cycle is complete (from the message's
+      // componentDidMount or componentDidUpdate), we then have to force an update
+      // to ensure the message's container is rerendered. At that point, the Grid will
+      // pull the new heights from the cache using the getRowHeight function.
       this.forceUpdate();
     }
   },
@@ -141,9 +146,15 @@ const ConsoleOutput = createClass({
             return createElement(AutoSizer,
               autosizerProps,
               ({ height, width }) => {
+                const widestRow = cellSizeCache.getWidestRowDimension();
                 let gridProps = {
                   columnCount: 1,
-                  columnWidth: width,
+                  columnWidth: widestRow > width ? widestRow : width,
+                  // Make sure the inner container overflow is visible for scroller at
+                  // the bottom.
+                  containerStyle: {
+                    overflow: "visible",
+                  },
                   height,
                   overscanRowCount: 5,
                   cellRenderer: this._renderRow,

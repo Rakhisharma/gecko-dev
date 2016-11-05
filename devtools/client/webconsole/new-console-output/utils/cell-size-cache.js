@@ -10,12 +10,14 @@ module.exports = class CellSizeCache {
   constructor() {
     this._cachedRowHeights = {};
     this._indexToIdMap = {};
+    this._widestRowDimension = 0;
     this._isDirty = false;
   }
 
   clearAllRowHeights() {
     this._cachedRowHeights = {};
     this._indexToIdMap = {};
+    this._widestRowDimension = 0;
     this._isDirty = true;
   }
 
@@ -56,6 +58,15 @@ module.exports = class CellSizeCache {
 
   getIndexFromId(id) {
     return this._indexToIdMap.indexOf(id);
+  }
+
+  getWidestRowDimension() {
+    return this._widestRowDimension;
+  }
+
+  setWidestRowDimension(width) {
+    this._widestRowDimension = width;
+    this._isDirty = true;
   }
 
   isDirty() {
