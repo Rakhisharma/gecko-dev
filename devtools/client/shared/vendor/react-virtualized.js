@@ -2935,7 +2935,7 @@ var REACT_SHALLOW_COMPARE = "devtools/client/shared/vendor/react-addons-shallow-
                     if (scrollToRow >= 0 && rowCount > 0) {
                         var targetIndex = Math.max(0, Math.min(rowCount - 1, scrollToRow)), calculatedScrollTop = this._rowSizeAndPositionManager.getUpdatedOffsetForIndex({
                             align: scrollToAlignment,
-                            containerSize: height - this._scrollbarSize,
+                            containerSize: height,
                             currentOffset: scrollTop,
                             targetIndex: targetIndex
                         });
