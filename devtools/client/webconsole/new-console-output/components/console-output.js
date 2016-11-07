@@ -13,6 +13,7 @@ const {
 const { findDOMNode } = require("devtools/client/shared/vendor/react-dom");
 
 const {
+  defaultCellRangeRenderer,
   AutoSizer,
   Grid,
 } = require("devtools/client/shared/vendor/react-virtualized");
@@ -121,6 +122,38 @@ const ConsoleOutput = createClass({
     });
   },
 
+  _renderCellRange(props) {
+    const {rowSizeAndPositionManager} = props;
+    rowSizeAndPositionManager.getUpdatedOffsetForIndex = function ({
+      align,
+      containerSize,
+      currentOffset, // safe
+      targetIndex,
+      totalSize
+    }) {
+      currentOffset = this._safeOffsetToOffset({
+        containerSize,
+        offset: currentOffset
+      })
+
+      const offset = this._cellSizeAndPositionManager.getUpdatedOffsetForIndex({
+        align,
+        containerSize: containerSize - 15,
+        currentOffset,
+        targetIndex,
+        totalSize
+      })
+
+      return this._offsetToSafeOffset({
+        containerSize,
+        offset
+      })
+    };
+    rowSizeAndPositionManager.getUpdatedOffsetForIndex = rowSizeAndPositionManager.getUpdatedOffsetForIndex.bind(rowSizeAndPositionManager)
+    const children = defaultCellRangeRenderer(props);
+    return children;
+  },
+
   _renderGrid() {
     const { lastForceScrollMessageIndex, messages } = this.props;
     const keyboardPagerProps = {
@@ -148,8 +181,10 @@ const ConsoleOutput = createClass({
               ({ height, width }) => {
                 const widestRow = cellSizeCache.getWidestRowDimension();
                 let gridProps = {
+                  cellRangeRenderer: this._renderCellRange,
                   columnCount: 1,
-                  columnWidth: widestRow > width ? widestRow : width,
+                  // @TODO replace 15 with scrollbar size
+                  columnWidth: widestRow > width ? widestRow : width - 15,
                   // Make sure the inner container overflow is visible for scroller at
                   // the bottom.
                   containerStyle: {
