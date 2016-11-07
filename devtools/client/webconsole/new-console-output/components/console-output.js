@@ -32,6 +32,9 @@ const ScrollPositionManager = require("devtools/client/webconsole/new-console-ou
 
 const { cellSizeCache } = require("devtools/client/webconsole/new-console-output/utils/caches");
 
+// @TODO Get an accurate scrollbar size.
+const SCROLLBAR_SIZE = 15;
+
 /**
  * The container for the list of messages.
  *
@@ -123,6 +126,9 @@ const ConsoleOutput = createClass({
   },
 
   _renderCellRange(props) {
+    // Monkey patch is needed to ensure container scrolls to last message even when there
+    // is a horizontal scroll bar.
+    // @TODO Figure out how to do this without monkey patching.
     const {rowSizeAndPositionManager} = props;
     rowSizeAndPositionManager.getUpdatedOffsetForIndex = function ({
       align,
@@ -134,20 +140,22 @@ const ConsoleOutput = createClass({
       currentOffset = this._safeOffsetToOffset({
         containerSize,
         offset: currentOffset
-      })
+      });
 
       const offset = this._cellSizeAndPositionManager.getUpdatedOffsetForIndex({
         align,
-        containerSize: containerSize - 15,
+        // We reduce the size of the container by the bottom scrollbar size. Even if the
+        // scrollbar isn't showing, the offsetToSafeOffset function will make it work.
+        containerSize: containerSize - SCROLLBAR_SIZE,
         currentOffset,
         targetIndex,
         totalSize
-      })
+      });
 
       return this._offsetToSafeOffset({
         containerSize,
         offset
-      })
+      });
     };
     rowSizeAndPositionManager.getUpdatedOffsetForIndex = rowSizeAndPositionManager.getUpdatedOffsetForIndex.bind(rowSizeAndPositionManager)
     const children = defaultCellRangeRenderer(props);
@@ -183,13 +191,11 @@ const ConsoleOutput = createClass({
                 let gridProps = {
                   cellRangeRenderer: this._renderCellRange,
                   columnCount: 1,
-                  // @TODO replace 15 with scrollbar size
-                  columnWidth: widestRow > width ? widestRow : width - 15,
-                  // Make sure the inner container overflow is visible for scroller at
-                  // the bottom.
-                  containerStyle: {
-                    overflow: "visible",
-                  },
+                  // If the widest row is wider than the container, use that. Otherwise,
+                  // use the container's width (with the scrollbar size subtracted so
+                  // that we don't trigger a horizontal scrollbar showing up).
+                  // @TODO Figure out how to remove SCROLLBAR_SIZE from the equasion here.
+                  columnWidth: widestRow > width ? widestRow : width - SCROLLBAR_SIZE,
                   height,
                   overscanRowCount: 5,
                   cellRenderer: this._renderRow,
