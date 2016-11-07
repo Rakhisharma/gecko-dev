@@ -678,6 +678,8 @@ a.learn-more-link.webconsole-learn-more-link {
   bottom: 0;
   left: 0;
   right: 0;
+  /* Make sure scrollbar doesn't flicker when JSTerm grows vertically */
+  overflow: hidden;
 }
 
 #output-container {
