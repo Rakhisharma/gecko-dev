@@ -20,6 +20,8 @@ const { cellSizeCache } = require("devtools/client/webconsole/new-console-output
 
 function filterTextSet(text) {
   return (dispatch) => {
+    // The indexes in the list of messages will no longer correspond to the same messages,
+    // so clear any cached row heights used by the React Virtualized Grid.
     cellSizeCache.clearAllRowHeights();
 
     dispatch({
@@ -31,6 +33,8 @@ function filterTextSet(text) {
 
 function filterToggle(filter) {
   return (dispatch, getState) => {
+    // The indexes in the list of messages will no longer correspond to the same messages,
+    // so clear any cached row heights used by the React Virtualized Grid.
     cellSizeCache.clearAllRowHeights();
 
     dispatch({
@@ -46,6 +50,8 @@ function filterToggle(filter) {
 
 function filtersClear() {
   return (dispatch, getState) => {
+    // The indexes in the list of messages will no longer correspond to the same messages,
+    // so clear any cached row heights used by the React Virtualized Grid.
     cellSizeCache.clearAllRowHeights();
 
     dispatch({

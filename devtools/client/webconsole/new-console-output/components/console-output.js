@@ -59,7 +59,7 @@ const ConsoleOutput = createClass({
   },
 
   componentDidMount() {
-    // For mochitests.
+    // Mochitests need to fire events on DOM nodes, so make it easy to access the node.
     this.props.serviceContainer.attachRefToHud("outputScroller", findDOMNode(this.grid));
   },
 

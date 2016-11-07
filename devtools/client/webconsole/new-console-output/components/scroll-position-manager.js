@@ -63,6 +63,8 @@ const ScrollPositionManager = createClass({
       this._scrollState.resizedWidth = width;
       cellSizeCache.clearAllRowHeights();
     }
+    // Force an update. If width changed, we need to recalculate all the rows. If height
+    // changed, we may need to adjust scrollTop so JSTerm doesn't cover the bottom row.
     this.forceUpdate();
   },
 

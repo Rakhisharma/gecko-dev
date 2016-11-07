@@ -34,6 +34,7 @@ function messageAdd(packet, idGenerator = null) {
   };
 
   if (message.type === MESSAGE_TYPE.CLEAR) {
+    // Clear all caches that React Virtualized uses.
     clearCaches();
 
     return batchActions([

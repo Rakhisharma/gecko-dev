@@ -34,6 +34,8 @@ const KeyboardPager = createClass({
   componentWillReceiveProps(nextProps) {
     // If the old list of messages is not a subset of the new list of messages, any stored
     // scroll state would be invalid, so reset.
+    // @TODO Move rowStartIndex and rowStopIndex to an external cache. Then clear the
+    // cache when certain actions are fired.
     if (!isSubset(this.props.list, nextProps.list)) {
       this._scrollState = getInitialScrollState();
     }
@@ -101,6 +103,11 @@ function getInitialScrollState() {
 function isSubset(prevList, nextList) {
   // Running List.isSubset() on large lists is a huge performance hit. Instead, we use a
   // heuristic to determine if the previous list is a subset of the next.
+  // There is a (very unlikely, maybe impossible) edge case here.
+  // See https://bugzilla.mozilla.org/show_bug.cgi?id=1308216#c23 for an explanation.
+  // We dont' care about this use case because this is only used to determine whether we
+  // should clear the rowStartIndex and rowStopIndex. The contents of the messages
+  // displayed isn't espcially important for those.
   return !(
     !prevList
     || prevList.size == 0
