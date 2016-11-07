@@ -69,9 +69,11 @@ const ScrollPositionManager = createClass({
   },
 
   _onScroll({ clientHeight, scrollHeight, scrollTop}) {
-    this._scrollState.clientHeight = clientHeight;
-    this._scrollState.scrollTop = scrollTop;
-    this._scrollState.scrollHeight = scrollHeight;
+    this._scrollState = Object.assign(this._scrollState, {
+      clientHeight,
+      scrollHeight,
+      scrollTop
+    });
   },
 
   _getScrollState() {
